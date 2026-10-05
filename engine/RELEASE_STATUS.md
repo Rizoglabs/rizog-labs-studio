@@ -35,7 +35,7 @@ The standalone engine certification gate is complete.
 
 ## Stable gate evidence
 
-- GitHub Actions run: #83
+- GitHub Actions run: #90
 - Published Dummy App smoke test: PASS
 - Browser certification: PASS
 - Backend lifecycle certification: PASS
