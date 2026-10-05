@@ -3,50 +3,48 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RizogKey Engine — Dummy App</title>
+  <meta name="theme-color" content="#f8f9ff">
+  <title>Aktivasi Perangkat — KASIR Toko Musik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@0..1,100..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <main class="shell">
-    <header class="hero">
-      <p class="eyebrow">RIZOG LABS · INTERNAL</p>
-      <h1>RizogKey Engine</h1>
-      <p class="subtitle">Dummy App untuk certification dan regression testing.</p>
-      <span id="statusBadge" class="badge badge-muted">BELUM DIINISIALISASI</span>
+  <div class="app-shell">
+    <header class="topbar">
+      <button id="backBtn" class="icon-btn topbar-side" type="button" aria-label="Kembali">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <div class="topbar-title">
+        <div id="topTitle">Aktivasi Perangkat <span class="live-dot" aria-hidden="true"></span></div>
+        <div id="topSubtitle" class="top-subtitle"></div>
+      </div>
+      <button id="helpBtn" class="icon-btn topbar-side" type="button" aria-label="Bantuan Informasi">
+        <span class="material-symbols-outlined">help</span>
+      </button>
     </header>
 
-    <section class="grid">
-      <article class="card">
-        <h2>Installation</h2>
-        <label>Product Code<input id="productCode" value="RUPKAS"></label>
-        <label>Installation Code<input id="installationCode" readonly></label>
-        <label>Public Key<input id="publicKey" readonly></label>
-        <button id="initBtn">Initialize Engine</button>
-      </article>
+    <main id="screen" class="screen">
+      <!-- Screen is rendered by app.js -->
+    </main>
+  </div>
 
-      <article class="card">
-        <h2>Activation</h2>
-        <label>Activation Code<input id="activationCode" placeholder="RPK-ACT-XXXX-XXXX-XXXX"></label>
-        <button id="activateBtn">Activate License</button>
-      </article>
+  <!-- Certification harness is intentionally off-canvas so the Dummy App remains 1:1 with the reference UI. -->
+  <section id="certificationHarness" class="cert-harness" aria-hidden="true">
+    <input id="productCode" value="RUPKAS" tabindex="-1">
+    <input id="installationCode" readonly tabindex="-1">
+    <input id="publicKey" readonly tabindex="-1">
+    <input id="activationCode" tabindex="-1">
+    <button id="initBtn" type="button">Initialize Engine</button>
+    <button id="activateBtn" type="button">Activate License</button>
+    <button id="revalidateBtn" type="button">Revalidate</button>
+    <button id="clearBtn" type="button">Clear Local State</button>
+    <span id="statusBadge">UNACTIVATED</span>
+    <pre id="licenseState"></pre>
+    <pre id="log"></pre>
+  </section>
 
-      <article class="card">
-        <h2>License State</h2>
-        <pre id="licenseState">Belum ada license grant.</pre>
-        <div class="actions">
-          <button id="revalidateBtn">Revalidate</button>
-          <button id="clearBtn" class="danger">Clear Local State</button>
-        </div>
-      </article>
-
-      <article class="card">
-        <h2>Test Log</h2>
-        <pre id="log"></pre>
-      </article>
-    </section>
-
-    <footer>Engine target: RizogKey Protocol V1 · Dummy App only</footer>
-  </main>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
