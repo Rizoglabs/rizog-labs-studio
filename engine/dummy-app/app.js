@@ -29,7 +29,32 @@ function setHarnessState() {
 }
 
 function icon(name, extra = "") {
-  return `<span class="material-symbols-outlined ${extra}">${name}</span>`;
+  const paths = {
+    arrow_back: '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.75 9a2.35 2.35 0 1 1 4.1 1.58c-.95.99-1.85 1.25-1.85 2.67"/><path d="M12 17h.01"/>',
+    check_circle: '<circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.2 2.2 4.8-5"/>',
+    verified: '<path d="m12 3 2 1.2 2.3-.1.9 2.1 1.9 1.2-.5 2.2.5 2.2-1.9 1.2-.9 2.1-2.3-.1-2 1.2-2-1.2-2.3.1-.9-2.1-1.9-1.2.5-2.2-.5-2.2 1.9-1.2.9-2.1 2.3.1z"/><path d="m9 12 2 2 4-4"/>',
+    fingerprint: '<path d="M6.5 10.5A5.5 5.5 0 0 1 17.5 11"/><path d="M7.5 14.5c.4-2.8.6-4.8 3.5-5.6 2.7-.8 5.1 1.2 5.5 4"/><path d="M8.5 18.5c1-1.8 1-4.7 1.5-6.5.5-1.6 1.6-2.5 3.1-2.5 2 0 3.3 1.6 3.4 3.6"/><path d="M12 13c.6 0 .9.4.8 1.1-.2 1.4-.5 2.6-1.1 3.9"/><path d="M4.5 13c.2-4 2.4-7 6.3-7.8M5 17.5c1.2-1.2 1.6-2.8 1.8-4.2"/>',
+    send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+    key: '<circle cx="8.2" cy="15.8" r="3.8"/><path d="m11.2 12.8 8.3-8.3 2 2-2.2 2.2 1.5 1.5-1.9 1.9-1.5-1.5-2.2 2.2"/>',
+    content_copy: '<rect x="8" y="8" width="10" height="10" rx="2"/><path d="M6 16H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+    content_paste: '<path d="M9 5h6"/><path d="M9 3h6a1 1 0 0 1 1 1v2H8V4a1 1 0 0 1 1-1Z"/><rect x="6" y="5" width="12" height="16" rx="2"/>',
+    qr_code_2: '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M14 14h3v3h-3zM18 18h2v2h-2zM14 18h2M18 14h2"/>',
+    verified_user: '<path d="M12 3 20 6v5c0 5-3.2 8.2-8 10-4.8-1.8-8-5-8-10V6z"/><path d="m8.7 12 2.1 2.1 4.5-4.5"/>',
+    support_agent: '<circle cx="12" cy="11" r="7"/><path d="M5 12v4a3 3 0 0 0 3 3h1M19 12v4"/><path d="M9 19h4"/><path d="M9 11h.01M15 11h.01"/>',
+    play_circle: '<circle cx="12" cy="12" r="9"/><path d="m10 8 6 4-6 4z"/>',
+    shield: '<path d="M12 3 19 6v5c0 4.7-2.6 8-7 10-4.4-2-7-5.3-7-10V6z"/><path d="m9 12 2 2 4-4"/>',
+    storefront: '<path d="M4 10v9h16v-9"/><path d="M3 10h18l-2-5H5z"/><path d="M8 19v-5h8v5"/>',
+    arrow_forward: '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
+    print: '<path d="M7 8V4h10v4"/><rect x="5" y="8" width="14" height="8" rx="2"/><path d="M8 16h8v4H8z"/><path d="M16 11h.01"/>',
+    error: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/>',
+    warning: '<path d="M12 4 21 19H3z"/><path d="M12 9v4"/><path d="M12 16h.01"/>',
+    refresh: '<path d="M20 11a8 8 0 1 0 1 5"/><path d="M20 5v6h-6"/>',
+    point_of_sale: '<path d="M5 7h14v10H5z"/><path d="M8 4h8v3H8z"/><path d="M8 11h8"/><path d="M8 14h3"/>',
+    close: '<path d="m8 8 8 8M16 8l-8 8"/>'
+  };
+  const body = paths[name] || paths.help;
+  return `<svg class="ui-icon ${extra}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
 }
 
 function mascot(src, type = "check") {
