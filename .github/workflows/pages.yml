@@ -19,20 +19,33 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
       - name: Validate frontend
         run: |
           node --check js/config.js
           node --check js/app.js
           ! grep -R -n -E "service_role|SUPABASE_SERVICE_ROLE|sb_secret_" js
+
+      - name: Validate RizogKey Dummy App
+        run: |
+          node --check engine/dummy-app/app.js
+          node --check engine/dummy-app/rizogkey-client.js
+          test -f engine/dummy-app/index.html
+          test -f engine/dummy-app/style.css
+          test -f engine/dummy-app/README.md
+
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v6
+
       - name: Upload site
         uses: actions/upload-pages-artifact@v5
         with:
           path: .
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
       - name: Smoke test published site
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
@@ -48,3 +61,12 @@ jobs:
           done
           echo "Published site smoke test failed."
           exit 1
+
+      - name: Smoke test Dummy App
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          DUMMY_URL="${PAGE_URL%/}/engine/dummy-app/"
+          echo "Smoke testing $DUMMY_URL"
+          curl --fail --silent --show-error --location --max-time 15 "$DUMMY_URL" | grep -q "RizogKey Engine"
+          echo "Dummy App is published."
