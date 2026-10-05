@@ -1,0 +1,105 @@
+<!-- Top Navigation Shell (Shared Component: TopAppBar small_center_aligned) -->
+<header class="w-full bg-surface-container-lowest border-b border-outline-variant/30 sticky top-0 z-50">
+<div class="flex justify-between items-center w-full px-space-md py-space-sm max-w-7xl mx-auto">
+<button id="btn-open-store" id="btn-print" id="backBtn" aria-label="Kembali" class="w-10 h-10 flex items-center justify-center rounded-xl text-secondary hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 active:scale-95 transition-transform duration-100" type="button">
+<span class="material-symbols-outlined text-[22px]">arrow_back</span>
+</button>
+<div class="flex flex-col items-center"><span class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight">Status Aktivasi</span>
+<span class="font-label-sm text-label-sm text-outline tracking-wider uppercase">KASIR TOKO MUSIK</span></div>
+<button id="helpBtn" aria-label="Bantuan Aktivasi" class="w-10 h-10 flex items-center justify-center rounded-xl text-secondary hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 active:scale-95 transition-transform duration-100" type="button">
+<span class="material-symbols-outlined text-[22px]">help_outline</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas Content -->
+<main class="flex-1 flex flex-col items-center justify-center px-space-md py-space-lg w-full max-w-3xl mx-auto">
+<!-- Central Success Visual Cluster -->
+<div class="flex flex-col items-center text-center mb-space-lg"><div class="relative mb-space-md">
+  <div class="absolute -inset-2 bg-primary-fixed/30 rounded-full blur-xl opacity-50"></div>
+  <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-surface-container-lowest border-2 border-primary/20 shadow-sm flex items-center justify-center">
+    <img alt="Maskot KASIR Toko Musik" class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDniRLdsx9TePzbe0e7nio_KNAGVFYz0a1EB4VgJAvWXkv2C-nQiv-9fOVgTOp3tQ_NLPXyn09X7WdRZHv2upLPJcokPkXvm0INXHlrKTxzXPaGE5fbQP9QktNnFA0VV0I6FjDFQYzmlJrmeKLh_Yl7Cbjiuu8-PJ-4pS4pdfS0BtfnvrVYrYHl1N_iQL4_ywceLUEpID0DcT8F8pZiGlZOqRuQ9-fHMoReUmS6zyzO-h1BgsreR3tAIUjEDFr8AhHFQw">
+    <div class="absolute -bottom-1 -right-1 bg-primary text-on-primary rounded-full p-1.5 shadow-md flex items-center justify-center ring-4 ring-surface-container-lowest">
+      <span class="material-symbols-outlined material-symbols-fill text-[22px]">check_circle</span>
+    </div>
+  </div>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-low border border-primary/20 text-primary mb-space-sm">
+  <span class="material-symbols-outlined text-[16px] text-primary">verified</span>
+  <span class="font-label-md text-label-md font-medium">Perangkat Tervalidasi</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg sm:font-headline-xl sm:text-headline-xl text-on-surface tracking-tight mb-space-xs">
+  Aktivasi Berhasil!
+</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-lg mx-auto">
+  Perangkat ini resmi terhubung dan terverifikasi sebagai Terminal Kasir Toko Musik. Seluruh data transaksi tersimpan aman di perangkat Anda.
+</p></div>
+<!-- Structured Specification Card (License & Terminal Details) -->
+<div class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-space-md sm:p-space-lg shadow-sm mb-space-md"><div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-outline-variant/20">
+  <div class="flex items-center gap-2">
+    <span class="material-symbols-outlined text-primary text-[20px]">verified_user</span>
+    <span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Informasi Lisensi Perangkat</span>
+  </div>
+  <span class="inline-flex items-center gap-1 text-primary bg-surface-container-low px-2.5 py-0.5 rounded-full font-label-sm text-label-sm border border-primary/20 font-medium">
+    <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> Aktif
+  </span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3.5 gap-x-6 py-space-xs">
+  <div class="flex flex-col">
+    <span class="font-label-sm text-label-sm text-outline">ID Lisensi</span>
+    <div class="flex items-center gap-2 mt-1">
+      <span id="licenseIdDisplay" class="font-data-code-sm text-data-code-sm text-on-surface font-semibold bg-surface-container-low px-2 py-1 rounded border border-outline-variant/30">__LICENSE_ID__</span>
+      <span class="inline-flex items-center text-primary font-label-sm text-label-sm font-medium">
+        <span class="material-symbols-outlined text-[15px] mr-0.5">check</span> Terverifikasi
+      </span>
+    </div>
+  </div>
+  <div class="flex flex-col">
+    <span class="font-label-sm text-label-sm text-outline">ID Terminal</span>
+    <span id="terminalIdDisplay" class="font-data-code-sm text-data-code-sm text-on-surface font-semibold mt-1.5">__TERMINAL_ID__</span>
+  </div>
+  <div class="flex flex-col">
+    <span class="font-label-sm text-label-sm text-outline">Tipe Lisensi</span>
+    <span class="font-body-md text-body-md font-medium text-on-surface mt-1">Lisensi Toko Musik v1.0 <span class="text-outline text-body-sm font-normal">(Permanen)</span></span>
+  </div>
+  <div class="flex flex-col">
+    <span class="font-label-sm text-label-sm text-outline">Penyimpanan</span>
+    <div class="flex items-center gap-1.5 mt-1">
+      <span class="material-symbols-outlined text-primary text-[18px]">check_circle</span>
+      <span class="font-body-md text-body-md font-medium text-primary">Memori Lokal Siap</span>
+    </div>
+  </div>
+</div></div>
+<!-- Soft Teal Guidance Banner -->
+<div class="w-full bg-surface-container-low border border-primary/20 rounded-xl p-space-md flex items-center gap-3.5 mb-space-lg shadow-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary flex-shrink-0 border border-primary/20">
+<span class="material-symbols-outlined text-[20px]">storefront</span>
+</div>
+<div class="flex-1">
+<span class="font-label-md text-label-md text-primary block">Langkah Selanjutnya</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Lengkapi profil toko musik Anda untuk mulai mencatat transaksi.
+        </p>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] hidden sm:block">arrow_forward</span>
+</div>
+<!-- Action Buttons Cluster -->
+<div class="w-full flex flex-col-reverse sm:flex-row items-center justify-center gap-space-sm sm:gap-space-md">
+<!-- Secondary Button: Print Activation Proof -->
+<button class="w-full sm:w-auto px-6 h-12 rounded-xl bg-surface-container-lowest border border-outline-variant/40 hover:bg-surface-container hover:border-outline-variant text-on-surface font-label-lg text-label-lg flex items-center justify-center gap-2 transition-all duration-150 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px] text-secondary">print</span>
+<span class="">Cetak Bukti Aktivasi</span>
+</button>
+<!-- Primary Action Button: Open Shop Profile -->
+<button class="w-full sm:w-auto px-8 h-12 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2.5 shadow-sm transition-all duration-150 active:scale-95" type="button">
+<span class="">Lanjut ke Buka Toko Baru</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</main>
+<!-- Ambient Footer Status Anchor -->
+<footer class="w-full py-space-sm px-space-md border-t border-outline-variant/20 bg-surface-container-lowest/50 text-center">
+<div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1 text-outline font-body-sm text-body-sm"><div class="flex items-center justify-center gap-2 mx-auto text-outline font-body-sm text-body-sm">
+  <span class="w-2 h-2 rounded-full bg-primary"></span>
+  <span class="">Sistem Kasir Siap Digunakan</span>
+</div></div>
+</footer>
