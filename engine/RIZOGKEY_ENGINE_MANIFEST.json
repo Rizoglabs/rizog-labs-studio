@@ -18,7 +18,9 @@
     "android"
   ],
   "production_apps_integrated": [],
-  "test_apps": [],
+  "test_apps": [
+    "engine/dummy-app"
+  ],
   "default_device_limit": 1,
   "license_durations": [
     "1M",
