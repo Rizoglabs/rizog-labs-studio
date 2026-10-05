@@ -1,4 +1,4 @@
-import { RizogKeyDummyClient } from "./rizogkey-client.js";
+import { RizogKeyDummyClient } from "./rizogkey-client.js?v=20261005-7";
 const PRODUCT="RUPKAS";
 const root=document.getElementById("dummy-app-root");
 let client=new RizogKeyDummyClient(PRODUCT,{trustedSigningKeys:globalThis.__RIZOGKEY_TEST_CONFIG__?.trustedSigningKeys});
