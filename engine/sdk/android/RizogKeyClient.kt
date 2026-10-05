@@ -109,6 +109,10 @@ class RizogKeyClient(
             .remove(SIGNING_KEY_VERSION)
             .remove(INSTALLATION_CODE)
             .apply()
+        runCatching {
+            KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.deleteEntry(alias)
+        }
+        keyPair = null
     }
 
     private fun loadOrCreateKeyPair() {
