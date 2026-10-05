@@ -118,6 +118,29 @@ await page.route(apiUrl, async (route) => {
     return;
   }
 
+  if (responseMode === "offline") {
+    const signed = signGrant(privateKey, publicKey, grantPayload(currentInstallationId, {
+      expires_at: new Date(Date.now() + 30 * 86400000).toISOString(),
+      offline_until: new Date(Date.now() - 1000).toISOString(),
+    }));
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ data: signed }),
+    });
+    return;
+  }
+
+  if (responseMode === "revoked") {
+    const signed = signGrant(privateKey, publicKey, grantPayload(currentInstallationId, { status: "REVOKED" }));
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ data: signed }),
+    });
+    return;
+  }
+
   if (responseMode === "expired") {
     const signed = signGrant(privateKey, publicKey, grantPayload(currentInstallationId, {
       expires_at: new Date(Date.now() - 1000).toISOString(),
@@ -161,15 +184,8 @@ await page.reload({ waitUntil: "networkidle" });
 assert.equal(await page.locator("h1").filter({ hasText: "Aktivasi Berhasil!" }).count(), 1);
 console.log("PASS persistence across reload");
 
-const networkError = await page.evaluate(async () => {
-  try {
-    window.__RIZOGKEY_TEST__.client().request = async () => { throw new Error("RK_NETWORK_UNAVAILABLE"); };
-    await window.__RIZOGKEY_TEST__.client().revalidate();
-    return "NO_ERROR";
-  } catch (e) {
-    return e.message;
-  }
-});
+responseMode = "network";
+const networkError = await page.evaluate(() => window.__RIZOGKEY_TEST__.client().revalidate().then(() => "NO_ERROR").catch(e => e.message));
 assert.equal(networkError, "RK_NETWORK_UNAVAILABLE");
 console.log("PASS network-loss path");
 
@@ -178,6 +194,18 @@ const expiredError = await page.evaluate(() => window.__RIZOGKEY_TEST__.client()
 assert.equal(expiredError, "NO_ERROR");
 assert.equal(await page.evaluate(() => window.__RIZOGKEY_TEST__.client().status()), "EXPIRED");
 console.log("PASS expiration state");
+
+responseMode = "offline";
+const offlineError = await page.evaluate(() => window.__RIZOGKEY_TEST__.client().revalidate().then(() => "NO_ERROR").catch(e => e.message));
+assert.equal(offlineError, "NO_ERROR");
+assert.equal(await page.evaluate(() => window.__RIZOGKEY_TEST__.client().status()), "REVALIDATION_REQUIRED");
+console.log("PASS offline grace boundary");
+
+responseMode = "revoked";
+const revokedError = await page.evaluate(() => window.__RIZOGKEY_TEST__.client().revalidate().then(() => "NO_ERROR").catch(e => e.message));
+assert.equal(revokedError, "NO_ERROR");
+assert.equal(await page.evaluate(() => window.__RIZOGKEY_TEST__.client().status()), "REVOKED");
+console.log("PASS revoke state");
 
 responseMode = "bad_signature";
 const badSig = await page.evaluate(() => window.__RIZOGKEY_TEST__.client().revalidate().then(() => "NO_ERROR").catch(e => e.message));
