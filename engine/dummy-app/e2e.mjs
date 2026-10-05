@@ -6,6 +6,12 @@ const baseUrl = process.env.DUMMY_URL;
 const apiUrl = "https://nddipymcyeargsdbulyo.supabase.co/functions/v1/rizogkey-client";
 if (!baseUrl) throw new Error("DUMMY_URL is required");
 
+function canonicalJson(value) {
+  if (Array.isArray(value)) return "[" + value.map(item => canonicalJson(item)).join(",") + "]";
+  if (value && typeof value === "object") return "{" + Object.keys(value).sort().map(key => JSON.stringify(key) + ":" + canonicalJson(value[key])).join(",") + "}";
+  return JSON.stringify(value);
+}
+
 function b64(buffer) { return Buffer.from(buffer).toString("base64"); }
 
 function grantPayload(installationId, overrides = {}) {
@@ -27,7 +33,7 @@ function grantPayload(installationId, overrides = {}) {
 }
 
 function signGrant(privateKey, publicKey, grant) {
-  const signature = sign(null, Buffer.from(JSON.stringify(grant)), privateKey);
+  const signature = sign(null, Buffer.from(canonicalJson(grant)), privateKey);
   const der = publicKey.export({ format: "der", type: "spki" });
   const raw = der.subarray(der.length - 32);
   return {
