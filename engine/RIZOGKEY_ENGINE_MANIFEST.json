@@ -2,7 +2,7 @@
   "product": "RizogKey Engine",
   "vendor": "Rizog Labs",
   "product_type": "Reusable Licensing Engine",
-  "engine_version": "1.0.0-alpha",
+  "engine_version": "1.0.0-rc.1",
   "protocol_version": 1,
   "integration_mode": "Client SDK / Adapter",
   "admin_control_plane": "Rizog Labs Studio",
@@ -29,6 +29,8 @@
     "LIFETIME"
   ],
   "offline_grace_days_default": 90,
-  "status": "ALPHA",
-  "do_not_embed_until_engine_validation": true
+  "status": "RELEASE_CANDIDATE",
+  "release_channel": "rc",
+  "do_not_embed_until_engine_validation": true,
+  "stable_gate": "engine/STABLE_RELEASE_GATE.md"
 }
