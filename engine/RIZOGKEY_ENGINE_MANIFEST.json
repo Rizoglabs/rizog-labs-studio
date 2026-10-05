@@ -34,7 +34,7 @@
   "do_not_embed_until_engine_validation": false,
   "stable_gate_date": "2026-10-05",
   "stable_gate_evidence": {
-    "github_actions_run": 83,
+    "github_actions_run": 90,
     "backend_certification": "PASS",
     "browser_certification": "PASS",
     "protocol_version": 1
