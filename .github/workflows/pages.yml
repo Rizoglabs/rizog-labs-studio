@@ -33,6 +33,7 @@ jobs:
           test -f engine/dummy-app/index.html
           test -f engine/dummy-app/style.css
           test -f engine/dummy-app/README.md
+          test -f engine/dummy-app/e2e.mjs
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v6
@@ -70,3 +71,14 @@ jobs:
           echo "Smoke testing $DUMMY_URL"
           curl --fail --silent --show-error --location --max-time 15 "$DUMMY_URL" | grep -q "RizogKey Engine"
           echo "Dummy App is published."
+
+      - name: Setup Node test dependencies
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+
+      - name: Run Dummy App browser certification
+        env:
+          DUMMY_URL: ${{ steps.deployment.outputs.page_url }}/engine/dummy-app/
+        run: node engine/dummy-app/e2e.mjs
