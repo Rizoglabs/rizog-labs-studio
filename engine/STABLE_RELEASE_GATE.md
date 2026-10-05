@@ -32,7 +32,10 @@ The browser suite must remain green after every engine change.
 
 Do not label the engine STABLE merely because the source code exists. The release status must be changed only after all gates above are green in the same release candidate.
 
-## Current release candidate
+## Stable result
 
-Version: 1.0.0-rc.1
+Version: 1.0.0
 Protocol: V1
+Status: STABLE
+
+GitHub Actions certification run: #83
