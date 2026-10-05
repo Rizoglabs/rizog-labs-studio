@@ -25,14 +25,14 @@ jobs:
           node --check js/app.js
           ! grep -R -n -E "service_role|SUPABASE_SERVICE_ROLE|sb_secret_" js
       - name: Setup GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Upload site
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: .
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
       - name: Smoke test published site
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
