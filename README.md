@@ -29,3 +29,7 @@ After the first deployment, use the generated GitHub Pages URL as the Supabase A
 - Search/filter
 - Revoke
 - Responsive desktop/tablet/mobile UI
+
+## Build
+
+V1 deployment baseline — 2026-10-05.
