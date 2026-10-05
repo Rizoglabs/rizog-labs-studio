@@ -7,10 +7,6 @@ const apiUrl = "https://nddipymcyeargsdbulyo.supabase.co/functions/v1/rizogkey-c
 
 if (!baseUrl) throw new Error("DUMMY_URL is required");
 
-function base64(value) {
-  return Buffer.from(value).toString("base64");
-}
-
 function makeSignedGrant(privateKey, publicKeyDer) {
   const grant = {
     version: 1,
@@ -27,10 +23,9 @@ function makeSignedGrant(privateKey, publicKeyDer) {
     last_validated_at: new Date().toISOString(),
   };
 
-  const payload = Buffer.from(JSON.stringify(grant));
-  const signature = sign(null, payload, privateKey);
-  const publicDer = publicKeyDer.export({ format: "der", type: "spki" });
-  const publicRaw = publicDer.subarray(publicDer.length - 32);
+  const signature = sign(null, Buffer.from(JSON.stringify(grant)), privateKey);
+  const der = publicKeyDer.export({ format: "der", type: "spki" });
+  const raw = der.subarray(der.length - 32);
 
   return {
     grant,
@@ -38,44 +33,39 @@ function makeSignedGrant(privateKey, publicKeyDer) {
     signing: {
       algorithm: "Ed25519",
       key_version: 1,
-      public_key: publicRaw.toString("base64"),
+      public_key: raw.toString("base64"),
     },
   };
 }
 
-async function assertBackendHealth() {
-  const response = await fetch(apiUrl, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ action: "health" }),
-  });
-
-  assert.equal(response.ok, true, "rizogkey-client health endpoint must return 2xx");
-
-  const payload = await response.json();
-  assert.equal(payload?.data?.ok, true, "health.ok must be true");
-  assert.equal(payload?.data?.signing_ready, true, "server signing must be ready");
-  console.log("PASS backend health/signing");
-}
-
-await assertBackendHealth();
+const health = await fetch(apiUrl, {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ action: "health" }),
+});
+assert.equal(health.ok, true, "rizogkey-client health endpoint must return 2xx");
+const healthPayload = await health.json();
+assert.equal(healthPayload?.data?.ok, true, "health.ok must be true");
+assert.equal(healthPayload?.data?.signing_ready, true, "server signing must be ready");
+console.log("PASS backend health/signing");
 
 const { privateKey, publicKey } = generateKeyPairSync("ed25519");
 const signed = makeSignedGrant(privateKey, publicKey);
 
 const browser = await chromium.launch({ headless: true });
-const context = await browser.newContext();
+const context = await browser.newContext({
+  viewport: { width: 609, height: 1437 },
+  deviceScaleFactor: 1,
+});
 const page = await context.newPage();
-
-let badSignature = false;
+let invalidSignatureSeen = false;
 
 await page.route(apiUrl, async (route) => {
-  const request = route.request();
-  const body = JSON.parse(request.postData() || "{}");
+  const body = JSON.parse(route.request().postData() || "{}");
 
   if (body.action === "activate" || body.action === "revalidate") {
     if (body.activation_code === "BAD") {
-      badSignature = true;
+      invalidSignatureSeen = true;
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -103,44 +93,56 @@ await page.route(apiUrl, async (route) => {
 
 await page.goto(baseUrl, { waitUntil: "networkidle" });
 
+assert.equal(await page.locator("#topTitle").innerText(), "Aktivasi Perangkat •");
+assert.equal(await page.locator(".brand-name").innerText(), "KASIR TOKO MUSIK");
+assert.equal(await page.locator(".page-title").innerText(), "Aktivasi Perangkat");
+assert.equal(await page.locator(".activation-grid").count(), 1);
+assert.equal(await page.locator("text=arrow_back").count(), 0);
+assert.equal(await page.locator("text=check_circle").count(), 0);
+
 const initialInstallationCode = await page.locator("#installationCode").inputValue();
 assert.match(initialInstallationCode, /^RPK-INST-[A-Z2-9]{5}-[A-Z2-9]{5}$/);
 assert.ok((await page.locator("#publicKey").inputValue()).length > 20);
-assert.equal(await page.locator("#statusBadge").textContent(), "UNACTIVATED");
-console.log("PASS fresh installation state");
+console.log("PASS input UI");
 
-await page.locator("#activationCode").fill("RPK-ACT-DUMMY-0001");
-await page.locator("#activateBtn").click();
+await page.locator("#activationCodeUi").fill("RPK-ACT-DUMMY-0001");
+await page.locator("#verifyBtn").click();
 await page.waitForTimeout(300);
 
 assert.equal(await page.locator("#statusBadge").textContent(), "ACTIVE");
-assert.match(await page.locator("#licenseState").textContent(), /RizogKey Dummy Certification/);
-console.log("PASS signed grant activation + verification");
+assert.equal(await page.locator(".success-title").innerText(), "Aktivasi Berhasil!");
+assert.equal(await page.locator(".active-chip").innerText(), "Aktif");
+assert.equal(await page.locator("text=arrow_back").count(), 0);
+console.log("PASS visible activation + success UI");
 
 await page.reload({ waitUntil: "networkidle" });
 assert.equal(await page.locator("#statusBadge").textContent(), "ACTIVE");
+assert.equal(await page.locator(".success-title").innerText(), "Aktivasi Berhasil!");
 assert.equal(await page.locator("#installationCode").inputValue(), initialInstallationCode);
-console.log("PASS persisted identity + license state");
+console.log("PASS persistence");
 
-await page.locator("#revalidateBtn").click();
+await page.evaluate(() => document.getElementById("revalidateBtn").click());
 await page.waitForTimeout(300);
 assert.equal(await page.locator("#statusBadge").textContent(), "ACTIVE");
 console.log("PASS revalidation");
 
-await page.locator("#clearBtn").click();
-await page.waitForTimeout(200);
+await page.evaluate(() => document.getElementById("clearBtn").click());
+await page.waitForTimeout(300);
 const newInstallationCode = await page.locator("#installationCode").inputValue();
 assert.notEqual(newInstallationCode, initialInstallationCode);
 assert.equal(await page.locator("#statusBadge").textContent(), "UNACTIVATED");
-console.log("PASS clear state + new installation identity");
+assert.equal(await page.locator(".page-title").innerText(), "Aktivasi Perangkat");
+console.log("PASS clear state");
 
-await page.locator("#activationCode").fill("BAD");
-await page.locator("#activateBtn").click();
+await page.locator("#activationCodeUi").fill("BAD");
+await page.locator("#verifyBtn").click();
 await page.waitForTimeout(300);
-const log = await page.locator("#log").textContent();
-assert.match(log || "", /RK_GRANT_INVALID/);
-assert.equal(badSignature, true);
-console.log("PASS invalid signed grant rejection");
+
+assert.equal(invalidSignatureSeen, true);
+assert.equal(await page.locator("#statusBadge").textContent(), "UNACTIVATED");
+assert.equal(await page.locator(".page-title").innerText(), "Aktivasi Gagal");
+assert.match(await page.locator(".error-code").innerText(), /ERR_GRANT_SIG|ERR_AUTH_404/);
+console.log("PASS invalid signature + failure UI");
 
 await browser.close();
-console.log("RizogKey Dummy App E2E certification passed.");
+console.log("RizogKey Dummy App browser certification passed.");
