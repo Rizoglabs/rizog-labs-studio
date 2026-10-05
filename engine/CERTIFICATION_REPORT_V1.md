@@ -39,7 +39,7 @@ PASS:
 
 ## Browser certification
 
-GitHub Actions run #83 passed:
+GitHub Actions run #90 passed:
 
 - first launch + Installation Code
 - visible activation UI
