@@ -229,6 +229,22 @@ Conceptual payload:
 
 The production implementation should use a server signature so the client can detect tampering.
 
+
+## 7A. Signed Grant Canonicalization and Trust
+
+License Grant signatures use a deterministic canonical JSON serialization for the V1 signing payload:
+
+- object keys are sorted lexicographically;
+- arrays preserve their existing order;
+- primitive values use JSON serialization;
+- whitespace is not added.
+
+The signature is calculated over the UTF-8 bytes of the canonical Grant JSON.
+
+Clients must verify the signature against a locally trusted signing-key map keyed by `key_version`. A client must NOT trust a public key merely because the server returned it beside the signature.
+
+Signing-key rotation is represented by a new `key_version`. Applications may ship more than one trusted public key during a rotation window.
+
 ## 8. Local License State
 
 Client may cache the latest valid grant locally.
