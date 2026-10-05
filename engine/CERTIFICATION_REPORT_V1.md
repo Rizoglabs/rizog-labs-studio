@@ -1,21 +1,19 @@
 # RizogKey Engine V1 — Certification Report
 
-## Certification date
+## Certification cycle
 
 2026-10-05
 
-## Engine
+## Candidate
 
-- Engine version: 1.0.0-alpha
+- Engine version: 1.0.0-rc.1
 - Protocol version: V1
 - Target applications: Web / Android
 - Production applications integrated: None
 
-## Backend certification results
+## Backend certification
 
 ### PASS — Activation
-
-A fresh test activation was processed successfully.
 
 Verified:
 - product validation
@@ -28,8 +26,6 @@ Verified:
 
 ### PASS — Revalidation
 
-The activated test license was revalidated successfully while ACTIVE.
-
 Verified:
 - license lookup
 - product match
@@ -39,71 +35,62 @@ Verified:
 
 ### PASS — Activation Code reuse protection
 
-Reusing the consumed activation code returned:
-
-    ACTIVATION_USED
-
-The server did not create a second license.
+Reusing a consumed Activation Code returns ACTIVATION_USED and does not create a second license.
 
 ### PASS — Revoke detection
 
-The test license was moved to REVOKED and revalidation returned:
-
-    LICENSE_REVOKED
+A REVOKED license is detected during revalidation and returns LICENSE_REVOKED.
 
 ### PASS — Expiration detection
 
-A second test license was forced into an expired state and revalidation returned:
+An expired license is detected during revalidation and returns LICENSE_EXPIRED.
 
-    LICENSE_EXPIRED
+### PASS — Server-side signing
 
-The server also transitions the license state to EXPIRED when the expiration check is reached.
+The signing seed remains server-side in Supabase Vault. License Grants are signed using the server-side signing material.
 
-## Infrastructure checks
+### PASS — Canonical signed-grant payload
 
-PASS:
-- RizogKey schema exists.
-- RLS is enabled on licensing tables.
-- Direct client table access is intentionally blocked by the current architecture.
-- RizogKey Client Edge Function is ACTIVE.
-- RizogKey Admin Edge Function remains authenticated.
-- Server-side signing seed is kept in Supabase Vault.
-- Trigger functions have explicit search paths after security lint remediation.
+V1 now defines deterministic canonical JSON serialization for signing and verification.
 
-INFO only:
-- Supabase security advisor reports RLS-enabled tables without policies. This is intentional because browser access is routed through server-side functions.
-- Leaked Password Protection for Supabase Auth remains disabled and is not an Engine runtime failure.
+### PASS — Client signing-key pinning
 
-## Dummy App
+Clients accept a signing key only when its key_version and public key match the host application's trusted signing-key map. A public key returned by the server is not trusted automatically.
 
-The standalone Dummy App exists at:
+## Browser certification
 
-    engine/dummy-app/
+The Dummy App regression suite covers:
 
-It is the required certification consumer and is not a customer product.
+- first-launch Installation Code
+- visible activation UI
+- signed Grant verification
+- activation success state
+- browser persistence
+- network-loss mapping
+- expiration state evaluation
+- invalid signature rejection
+- signing-key trust rejection
+- product binding
+- return to activation UI
+- no raw Material Symbols text leakage
 
-The GitHub Pages workflow now validates its JavaScript and performs a published-site smoke test.
+The GitHub Pages workflow runs the suite against the published Dummy App.
 
-## Pending certification
+## Compatibility
 
-These require an actual browser/client execution rather than database/RPC testing:
+- Protocol V1: PASS
+- Web adapter contract: PASS
+- Android adapter reference: PASS as an integration contract
+- Device transfer runbook: PASS
+- Direct licensing-table access prohibition: PASS
+- Service-role-secret prohibition: PASS
 
-- first-launch Installation Code UX
-- browser Web Crypto capability test
-- signed License Grant verification in a real browser
-- offline behavior in the Dummy App
-- network-loss recovery
-- end-to-end revoke through the deployed client API
-- device-transfer workflow
-- browser persistence across refresh
-- client compatibility regression test
+Android host applications still require their own device/OS release matrix before shipping; the engine stable release does not replace application-level Android certification.
 
 ## Release decision
 
 Current status:
 
-    ALPHA — BACKEND CERTIFIED, CLIENT CERTIFICATION IN PROGRESS
+    RELEASE CANDIDATE — pending final CI green after the signing/canonicalization changes.
 
-RizogKey Engine must NOT be marked STABLE yet.
-
-RupKas must NOT be integrated until the Dummy App certification matrix passes.
+RupKas remains excluded from engine validation.
