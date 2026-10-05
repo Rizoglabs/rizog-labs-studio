@@ -1,14 +1,12 @@
 # RizogKey Engine
 
-RizogKey Engine is the reusable internal licensing product of Rizog Labs.
+RizogKey Engine 1.0.0 is the reusable internal licensing product of Rizog Labs.
 
-It is NOT a customer application and it is NOT embedded directly into a production customer app during engine development.
+It is a stable dependency for future Rizog Labs applications. It is not a customer application and the internal name "RizogKey" must never be exposed as a customer-facing brand.
 
 ## Product role
 
-RizogKey Engine provides a standard licensing layer that future Rizog Labs applications can consume.
-
-It defines:
+RizogKey Engine provides:
 
 - Installation identity
 - Installation Code
@@ -21,43 +19,64 @@ It defines:
 - Revoke handling
 - Signed License Grant
 - Client integration contract
-- Platform adapters
+- Web and Android adapter boundaries
 
 ## Relationship to Rizog Labs Studio
 
 RizogKey Engine is the licensing product.
 
-Rizog Labs Studio is the administrative control plane that operates the licensing infrastructure.
+Rizog Labs Studio is the administrative control plane that generates Activation Codes, shows licensing history and performs administrative revoke/transfer operations.
 
-Customer applications consume RizogKey Engine through the defined client contract.
+Customer applications consume RizogKey Engine through the client contract and must not access licensing tables directly.
+
+## Stable release
+
+- Engine: 1.0.0
+- Protocol: V1
+- Status: STABLE
+- Default device limit: 1
+- License durations: 1M / 6M / 1Y / LIFETIME
+- Default offline grace: 90 days
+- Supported targets: Web / Android
+
+## Integration entry point
+
+Start with:
+
+- `RIZOGKEY_INTEGRATION_CONTRACT.md`
+- `PLANNING_ATTACHMENT.md`
+- `sdk/INTEGRATION_PACK.md`
+- `sdk/INTEGRATION_CHECKLIST.md`
+
+Platform guides:
+
+- `sdk/WEB_INTEGRATION_GUIDE.md`
+- `sdk/ANDROID_INTEGRATION_GUIDE.md`
+
+Security and operations:
+
+- `sdk/ERROR_MAPPING.md`
+- `DEVICE_TRANSFER_RUNBOOK.md`
+- `COMPATIBILITY_MATRIX_V1.md`
+- `STABLE_RELEASE_GATE.md`
 
 ## Development rule
 
-Do not integrate RizogKey Engine into RupKas or another production application while the engine contract is still changing.
+Do not modify stable licensing behavior inside a production app.
 
-Use a dedicated Dummy App / Test App to validate every engine release first.
+Engine changes must be made in the engine, validated with the Dummy App, and released as a new engine version before host applications consume the change.
 
-## Target packaging
+## Current certification
 
-A future engine release should be attachable to product planning as one reusable product artifact.
+The published Dummy App and its browser certification are part of the engine regression suite.
 
-A planning package should contain:
+Current stable CI evidence is recorded in `CERTIFICATION_REPORT_V1.md`.
 
-1. Product manifest
-2. Engine architecture
-3. Protocol contract
-4. Integration contract
-5. Platform requirements
-6. Security requirements
-7. Compatibility rules
-8. Test requirements
-9. Known limitations
-10. Version/changelog
+## Versioning
 
-## Current status
+Breaking licensing protocol changes require a new protocol version.
 
-RizogKey Engine V1 is in foundation/alpha stage.
+A host application pins both:
 
-The backend protocol and licensing API foundations exist.
-
-Customer-app integration is intentionally NOT part of this stage.
+- RizogKey Engine version
+- RizogKey Protocol version
