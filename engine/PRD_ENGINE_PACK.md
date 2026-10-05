@@ -1,183 +1,266 @@
-# RizogKey Engine — PRD Attachment Pack
+# RizogKey Engine — Product Requirements Document Pack
 
-Version: 1.0  
-Engine baseline: RizogKey Engine 1.0.0 (STABLE)  
-Protocol baseline: V1  
-Purpose: Attach this document when prompting for a PRD for a RizogLabs application that will use RizogKey.
+Version: 2.0  
+Document type: Product Requirements Document (PRD) for RizogKey Engine  
+Owner: Rizog Labs  
+Current release baseline: Engine 1.0.0 — STABLE  
+Protocol baseline: V1
 
 ---
 
 ## Copy-ready prompt
 
-Use this attachment as the licensing and product-registration baseline for the PRD. Treat the architecture boundaries, security rules, customer terminology, and acceptance criteria below as requirements.
+Use this pack to create or update the PRD for **RizogKey Engine itself**.
 
-Write a product-specific PRD from the product brief. Keep business features separate from the shared licensing engine. Do not design a parallel licensing system, duplicate RizogKey data, or invent APIs, database tables, fields, or backend behavior. If a required value is missing, mark it **TBD — confirm with owner**, list the decision needed, and do not silently assume it.
+The subject of the PRD is always RizogKey Engine. Do not turn this into a PRD for a customer app, host application, or another product. Do not add, invent, or request names for consumer products. Do not include example Product Codes, product names, display names, or product identity blocks.
 
-Pin the current baseline: RizogKey Engine 1.0.0 and Protocol V1. Propose another version only when requested or when verified compatibility evidence requires it. Identify which requirements come from RizogKey and which are product-specific. Include the required PRD sections and acceptance criteria in this pack.
+Treat the engine boundaries, security requirements, and current stable baseline in this pack as constraints. Inspect the repository, manifest, contracts, SDKs, backend functions, database migrations, Studio, and certification evidence before describing current behavior. Distinguish verified existing behavior from proposed changes. Never invent APIs, schema, cryptographic behavior, or guarantees. Mark unresolved decisions as **TBD — confirm with owner**, with the decision and its impact.
 
-## 1. Current engine baseline
+Produce an implementation-ready PRD for RizogKey Engine, including the sections and acceptance criteria below. Keep it reusable across future consuming applications: discuss consumer applications generically, without naming any.
 
-Use the repository manifest and compatibility documents as the source of truth.
+## 1. Product definition
 
-- Engine version: 1.0.0, release status STABLE
+**Product name:** RizogKey Engine  
+**Product owner:** Rizog Labs  
+**Product type:** Shared licensing engine and control-plane capability  
+**Purpose:** Provide a secure, versioned, reusable licensing lifecycle for applications that integrate through the supported client and protocol contracts.
+
+RizogKey Engine is an internal platform capability. “RizogKey” is not a customer-facing brand. Customer applications may present generic licensing concepts such as Installation Code, Activation Code, License, and Activation.
+
+## 2. Current baseline
+
+Use the repository manifest and release evidence as the source of truth.
+
+- Engine: 1.0.0, status STABLE
 - Protocol: V1 (protocol_version 1)
-- Supported adapter targets: Web and Android
+- Current supported adapters: Web and Android
 - Default device limit: 1
 - Supported durations: 1M, 6M, 1Y, LIFETIME
-- Default offline grace: 90 days
+- Default offline grace: 90 days, subject to the signed grant boundary
 - License Grant signatures: Ed25519
-- Control plane: Rizog Labs Studio
+- Administrative control plane: Rizog Labs Studio
 - Test consumer: Dummy App
 
-Stable engine status does not certify a host application. The repository currently lists no production app integrations. Each host app still needs product-level integration, device/OS, UX, and release-build certification before production.
+The stable label describes the engine release; it does not certify any consuming application. State current certification evidence separately from the proposed roadmap.
 
-## 2. Architecture and responsibilities
+## 3. Goals
 
-- **Rizog Labs Studio:** product registry and administrative control plane.
-- **RizogKey Client/Adapter:** installation identity, activation, grant verification, local license state, expiry/offline evaluation, and revalidation.
-- **RizogKey backend:** authoritative licensing validation and state.
-- **Consumer application:** product-specific screens and feature gating based on engine state.
+The PRD must define requirements to:
 
-The consumer app must use the existing RizogKey client/adapter contract. It must not access licensing tables directly or implement a second license lifecycle. Inspect the actual repository and backend during technical discovery. Record gaps when an existing system cannot meet a requirement.
+1. Create and manage installation identity using the supported platform adapters.
+2. Issue and consume Installation Codes and Activation Codes through the documented contract.
+3. Bind licenses to the correct installation and enforce device limits.
+4. Produce, sign, verify, store, and evaluate License Grants according to the current protocol.
+5. Support license duration, expiry, offline use, revalidation, revoke, and transfer lifecycle.
+6. Provide secure administrative product and license operations through Rizog Labs Studio and authorized backend paths.
+7. Maintain explicit client, protocol, backend, and engine version compatibility.
+8. Certify the engine with the Dummy App and document host integration requirements without defining any host product.
 
-## 3. Product registration
+## 4. Non-goals and boundaries
 
-Every consumer app needs one registered product identity.
+The PRD must not expand RizogKey Engine into:
 
-- Bind using a unique, stable Product Code, not a display name.
-- Product Codes use uppercase snake case, such as INVOICE_MAKER.
-- Product Code is a technical identifier, not a secret or customer-facing label.
-- Register the product in Rizog Labs Studio → Products before provisioning activation codes.
-- Do not change a Product Code after production use without a migration plan.
-- Keep a new product INACTIVE until identity, integration, and compatibility values are confirmed. Make it ACTIVE only when ready for new provisioning.
-- Do not hard-delete production products. Use INACTIVE or ARCHIVED to retain historical relationships.
-- Do not create a parallel licensing database or duplicate RizogKey product, installation, activation, or license records in the consumer app. The app may store its own business data.
+- A customer-facing application or brand.
+- A business-domain app or feature set for a consuming application.
+- A separate license database inside each consumer.
+- A mechanism for customer apps to query licensing tables directly.
+- An implicit promise that reference adapters certify every host app.
+- A change to stable Protocol V1 behavior without an explicit compatibility and versioning decision.
 
-Include this block in the PRD. Unknown values remain TBD.
+Consumer applications own their business data and business UX. RizogKey owns the shared license lifecycle and licensing state. Consumer applications use the documented SDK/adapter contract and decide how their own features react to engine states.
 
-    product:
-      product_code: "<TBD: reserve unique code in Rizog Labs Studio>"
-      product_name: "<TBD>"
-      display_name: "<TBD>"
-      brand: "RizogLabs"
-      platform: "<ANDROID | WEB | other supported target>"
-      initial_status: "INACTIVE"
-      app_version: "<TBD>"
-    licensing:
-      engine_version: "1.0.0"
-      protocol_version: "V1"
-      client_version: "<TBD: confirm SDK/adapter version>"
-      device_limit: 1
-      durations: [1M, 6M, 1Y, LIFETIME]
+## 5. Users and actors
 
-Do not reuse INVOICE_MAKER or any other example Product Code unless it is approved for the product in the brief.
+Describe these actors generically; do not assign consumer product names:
 
-## 4. Keep these objects separate
+- **Rizog Labs administrator:** manages engine configuration and authorized licensing operations.
+- **Integrator/developer:** integrates the engine through documented SDKs and protocol contracts.
+- **End user:** activates and uses a consuming application, following generic licensing UX.
+- **RizogKey Engine:** performs identity, activation, grant, state, and revalidation responsibilities.
+- **Rizog Labs Studio:** administrative control plane.
+- **RizogKey backend:** authoritative server-side validation and licensing state.
+- **Dummy App:** test consumer for engine regression and certification.
 
-- **Product:** registered application identity.
-- **Installation:** one RizogKey-managed app installation.
-- **Activation Code:** one-time code provisioned for the correct product/installation.
+For each actor, state permissions, supported actions, and trust boundaries from repository evidence.
+
+## 6. Core concepts and lifecycle
+
+Keep these concepts distinct:
+
+- **Installation:** one engine-managed installation identity on a supported platform.
+- **Installation Code:** identifier exposed for the activation workflow; not an Activation Code.
+- **Activation Code:** one-time or otherwise contract-defined credential used to request activation.
 - **License:** entitlement with status, duration, device limit, and installation binding.
-- **Activation:** validation that applies a license to the intended installation.
+- **License Grant:** signed data consumed and validated by a client according to Protocol V1.
+- **Activation:** server/client lifecycle operation that applies an eligible license to an installation.
+- **Revalidation:** refresh of authoritative state, subject to offline-grant rules.
+- **Revocation/transfer:** administrative lifecycle operations that change whether an installation may continue using an entitlement.
 
-One product can have many installations and licenses. Product Code, Installation Code, Activation Code, and License ID are not interchangeable.
+Write an authoritative state model based on implementation and contract evidence. Include normal, expired, revoked, offline, revalidation-required, and failure cases. Identify whether states are server-authoritative, client-derived, or grant-derived.
 
-## 5. Required user journeys and states
+## 7. Functional requirements
 
-The PRD must define:
+The PRD must define testable requirements for:
 
-1. **First launch:** initialize the supported client, create or restore installation identity, display Installation Code, and explain the next step.
-2. **Activation:** accept Activation Code; submit through RizogKey; verify signature, trusted key, protocol, Product Code, and installation binding before unlocking features.
-3. **Runtime:** define product-specific behavior for UNACTIVATED, ACTIVE, EXPIRED, REVOKED, REVALIDATION_REQUIRED, temporary network/server failure, and invalid grant.
-4. **Offline use:** follow the accepted signed grant and its offline_until boundary. The 90-day value is a default, not a value to hardcode over a grant.
-5. **Revalidation:** specify suitable triggers such as app start, return to foreground after meaningful offline time, or restored connectivity. Do not require a server check for every screen transition.
-6. **Device transfer:** do not copy installation private keys or local license state to another device. Document the admin revoke/transfer path; the new device gets a new Installation Code and activation.
+### Installation identity
 
-The engine determines license state. The application decides which business features and screens are gated for each state.
+- Initialization, identity creation/restoration, and retrieval of Installation Code.
+- Persistence behavior and recovery from local storage failure.
+- Device reinstall, app data clearing, backup/restore, and transfer behavior for Web and Android.
+- Protection against copying installation private keys or local license state across installations.
 
-## 6. Customer language
+### Activation and license binding
 
-Use Installation Code, Activation Code, License/Lisensi, and Activation/Aktivasi in customer-facing UI.
+- Activation Code validation and consumption.
+- Product binding as an abstract engine integration parameter; do not name or instantiate any consuming product.
+- Installation binding and device-limit enforcement.
+- Duplicate, expired, revoked, malformed, and already-consumed activation attempts.
+- Idempotency, concurrency, and retry behavior according to the actual backend contract.
+- Exact outcomes for success and each error class.
 
-Do not expose RizogKey, internal IDs, signing keys, backend details, or raw engine errors to normal customers. Internal technical sections of the PRD may use internal names.
+### License Grant and local evaluation
 
-## 7. Security requirements
+- Grant payload and signature contract, sourced from Protocol V1 artifacts.
+- Trusted-key configuration, key rotation, versioning, and rejection of untrusted keys.
+- Verification of signature, protocol, installation binding, and engine-supported constraints.
+- Local evaluation of status and expiry.
+- Offline eligibility through the grant's signed offline boundary; do not hardcode the default grace period over grant values.
+- Fail-closed behavior for invalid signature, malformed grant, or incompatible protocol.
 
-- Never put service-role/secret keys, admin credentials, signing private keys, or signing seeds in an APK, web bundle, or other client.
-- Never access licensing tables directly from the consumer app.
-- Pin trusted signing public keys in application configuration. Do not trust a key just because it arrives in a runtime response.
-- Verify signed grant, Product Code, protocol, and installation binding before granting access.
-- Invalid signatures and product mismatch fail closed; they can never result in ACTIVE.
-- Do not log Activation Codes, private-key material, signing secrets, or sensitive grant contents.
-- Android private-key material belongs in platform-secure storage when supported.
-- Web storage is persistent client storage, not a hardware-backed identity.
-- Do not copy local licensing state across installations.
+### Revalidation and network behavior
 
-## 8. Error behavior
+- Revalidation triggers, network failure handling, retry and backoff, and server error behavior.
+- Distinction between network unavailability and authoritative revoke/expiry.
+- Behavior when the offline grant expires or revalidation becomes required.
+- Prevention of excessive revalidation requests.
 
-Use engine/sdk/ERROR_MAPPING.md for current error meanings. The PRD must define safe customer messages and behavior for:
+### Revoke and transfer
 
-| Condition | Required behavior |
-|---|---|
-| Invalid or used code | Keep licensed features locked; explain retry or support path. |
-| Product mismatch | Reject; never unlock this app. |
-| Installation mismatch / device limit | Explain the supported transfer/support process. |
-| Revoked | Apply product gating and show support guidance. |
-| Expired | Explain renewal/reactivation. |
-| Network unavailable | Distinguish network failure from revoke/expiry; honor a still-valid offline grant. |
-| Revalidation required | Ask user to reconnect and revalidate. |
-| Invalid signature / untrusted key | Fail closed and show a safe support message. |
-| Local storage failure | Do not claim activation persisted; provide recovery guidance. |
+- Authorized administrative revoke and transfer operations.
+- Effects on server state and on later client revalidation.
+- Transfer to a new installation identity without copying private keys or local state.
+- Audit trail and operator visibility based on existing control-plane/backend behavior.
 
-## 9. Platform requirements
+### Control plane and backend
+
+- Product registry as a generic engine capability; requirements must not contain a sample product name or Product Code.
+- Activation generation/history, license and installation relationships, revoke/transfer, and authorization boundaries, where verified in the repository.
+- Server-side validation and secret custody.
+- Auditability, input validation, rate limiting, and operational observability grounded in actual architecture.
+- Explicit handling of gaps between current Studio functionality and engine requirements.
+
+## 8. Security, privacy, and threat model
+
+The PRD must include threats, mitigations, and verification evidence for:
+
+- Client extraction of privileged credentials or signing secrets.
+- Forged, altered, expired, replayed, or cross-installation grants.
+- Activation Code leakage, guessing, replay, or unintended reuse.
+- Product/protocol mismatch.
+- Installation identity copying or rollback.
+- Revoke bypass during offline operation.
+- Local data loss, tampering, clock changes, and restricted browser storage.
+- Unauthorized Studio operations and direct table access.
+- Sensitive data in logs, telemetry, or support diagnostics.
+- Signing-key rotation and compromise response.
+
+Baseline requirements:
+
+- No service-role key, signing private key, signing seed, or administrative credential in client bundles.
+- Licensing tables are accessed through authorized server-side paths, not directly by consumer apps.
+- Trusted public signing keys are pinned or otherwise trusted through a documented secure mechanism; runtime delivery alone does not establish trust.
+- Invalid signature or protocol/product/installation mismatch never grants ACTIVE state.
+- Activation Codes, private-key material, signing secrets, and sensitive grant contents are not written to logs.
+- Platform storage limitations are documented; Web storage is not hardware-backed identity.
+- State rollback and device transfer risks are explicitly addressed based on platform capabilities.
+
+Do not promise protections that the current platform cannot provide; list them as limitations or risks.
+
+## 9. Error taxonomy and observability
+
+Use the repository's current error mapping as the source of truth. Include:
+
+- Stable machine-readable error code and user-safe category.
+- Whether retry is appropriate and any backoff rules.
+- Expected client state after the error.
+- Safe diagnostic identifiers and redaction requirements.
+- Monitoring signals for activation failures, signature failures, revalidation outages, and administrative actions.
+
+Do not expose raw internal exceptions or sensitive protocol details to end users.
+
+## 10. Platform and compatibility requirements
 
 ### Android
 
-Record minimum/target OS, supported device matrix, install/upgrade/reinstall/clear-data/backup behavior, secure identity storage, lifecycle revalidation, and release-build certification. The reference adapter is not host-app certification.
+Specify supported OS/API levels from evidence, key storage, process lifecycle, reinstall/clear-data/backup behavior, network transitions, and release-build certification. Mark unverified platform coverage TBD.
 
 ### Web
 
-Record supported browsers, IndexedDB persistence, private/restricted storage behavior, refresh/multiple-tab/restart/storage-clear behavior, Web Crypto requirements, and trusted public-key configuration. Web storage is not equivalent to hardware identity.
+Specify supported browsers, IndexedDB and Web Crypto requirements, private/restricted storage behavior, refresh/multi-tab/restart/storage-clear behavior, and limitations versus hardware-backed identity.
 
-## 10. Required PRD structure
+### Version compatibility
 
-Include:
+Pin and define compatibility among engine version, Protocol V1, client/adapter versions, backend functions, and trusted signing-key versions. Explain breaking-change policy, deprecation, migrations, and rollback from evidence. A stable protocol change requires explicit versioning and compatibility review.
 
-1. Summary, goals, non-goals, users, and supported platforms.
-2. Product identity, Product Code, and registration status.
-3. Business features and which ones are license-gated.
-4. Pinned engine/protocol/client versions and compatibility assumptions.
-5. Activation, runtime, offline, revalidation, and transfer journeys.
-6. State matrix and customer-facing messages.
-7. Security, privacy, storage, and data boundaries.
-8. Rizog Labs Studio/backend dependencies.
-9. Functional and non-functional requirements with stable IDs.
-10. Acceptance criteria for valid, invalid, mismatched, offline, expired, revoked, and transfer cases.
-11. Platform-specific certification plan.
-12. Open questions, owner decisions, risks, rollout, and rollback plan.
+## 11. Non-functional requirements
 
-Keep licensing requirements traceable to this pack and business requirements traceable to the product brief.
+Define measurable targets or mark them TBD for:
 
-## 11. Minimum acceptance criteria
+- Security and cryptographic verification.
+- Availability and recovery objectives for authoritative backend operations.
+- Activation and revalidation latency.
+- Offline behavior and clock-skew tolerance.
+- Scalability, rate limits, and concurrency.
+- Reliability, data integrity, and audit retention.
+- Accessibility and localization of generic licensing UX.
+- Logging, monitoring, support diagnostics, and incident response.
+- SDK distribution, documentation quality, and integration effort.
 
-- **RK-PRD-01:** Product has a unique registered Product Code; app binds by that code.
-- **RK-PRD-02:** Product Code cannot be changed through ordinary editing.
-- **RK-PRD-03:** New product is not provisionable until explicitly ACTIVE.
-- **RK-PRD-04:** Product mismatch cannot activate or unlock another app.
-- **RK-PRD-05:** App uses approved client/adapter and never accesses licensing tables directly.
-- **RK-PRD-06:** Activation requires valid signature, protocol, product, and installation checks.
-- **RK-PRD-07:** Required licensing states have defined product behavior.
-- **RK-PRD-08:** Network loss differs from revoke/expiry and respects the signed grant boundary.
-- **RK-PRD-09:** Device transfer uses a new installation identity and documented admin process.
-- **RK-PRD-10:** Client contains no privileged credentials, signing secrets, or installation private keys.
-- **RK-PRD-11:** Host-app/platform certification is complete before production.
-- **RK-PRD-12:** Engine and Protocol are pinned and compatibility is verified.
+Do not fabricate numeric targets. Give each TBD an owner decision and the design/test impact.
 
-If the current engine/backend cannot meet a criterion, label it a dependency or gap. Do not claim unsupported behavior.
+## 12. Required PRD structure
 
-## 12. Repository references
+Deliver the engine PRD in this order:
 
-After drafting, use the matching implementation references:
+1. Executive summary and product definition.
+2. Current behavior and repository evidence.
+3. Goals, non-goals, actors, and trust boundaries.
+4. Architecture and component responsibilities.
+5. Core concepts and authoritative state/lifecycle model.
+6. Functional requirements with stable IDs.
+7. Security, privacy, and threat model.
+8. Error taxonomy and observability.
+9. Platform and compatibility requirements.
+10. Non-functional requirements and TBD decisions.
+11. Test strategy and certification gates, including Dummy App.
+12. Rollout, versioning, migration, rollback, and operations.
+13. Risks, dependencies, open questions, and decision owners.
+14. Traceability from each requirement to source evidence and acceptance criteria.
+
+Each requirement must say whether it is **Existing**, **Change**, or **New**. Cite repository paths and contract sections for verified behavior. Separate current facts from proposed requirements.
+
+## 13. Minimum acceptance criteria
+
+Use stable IDs and expand these into verifiable cases:
+
+- **RKE-PRD-01:** Document describes RizogKey Engine itself; it does not become a PRD for a consuming application.
+- **RKE-PRD-02:** No consumer product name, sample Product Code, or product identity example appears in the document.
+- **RKE-PRD-03:** Engine, Protocol, client/adapter, backend, and Studio responsibilities are separated and evidence-backed.
+- **RKE-PRD-04:** Installation, Activation Code, License, License Grant, and Activation are distinct.
+- **RKE-PRD-05:** Activation success and failure cases include binding, device limit, replay/duplicate, and authorization behavior from the actual contract.
+- **RKE-PRD-06:** Grant validation covers signature, trusted key, protocol, and installation binding; invalid grants fail closed.
+- **RKE-PRD-07:** Offline operation follows the signed grant boundary and distinguishes network failure from revoke/expiry.
+- **RKE-PRD-08:** Revalidation, revoke, transfer, expiry, and recovery behavior are specified across supported platforms.
+- **RKE-PRD-09:** Threat model covers secrets, grant tampering, identity copying, storage limits, and administrative access.
+- **RKE-PRD-10:** No fabricated API, schema, numeric SLO, or security guarantee is presented as existing behavior.
+- **RKE-PRD-11:** Existing behavior, proposed changes, TBD decisions, risks, and dependencies are clearly separated.
+- **RKE-PRD-12:** Test and release gates cover the engine with Dummy App and state host-application certification as separate work.
+
+If any criterion conflicts with current implementation, document the gap and owner decision. Do not claim the criterion is already met without evidence.
+
+## 14. Repository evidence to inspect
+
+Use these files and inspect additional implementation as needed:
 
 - engine/RIZOGKEY_ENGINE_MANIFEST.json
 - engine/RIZOGKEY_INTEGRATION_CONTRACT.md
@@ -190,5 +273,7 @@ After drafting, use the matching implementation references:
 - engine/sdk/WEB_INTEGRATION_GUIDE.md
 - engine/DEVICE_TRANSFER_RUNBOOK.md
 - engine/STABLE_RELEASE_GATE.md
+- engine/CERTIFICATION_REPORT_V1.md
+- Relevant backend functions, database migrations, client/adapter source, Studio source, tests, and workflows.
 
-This pack guides PRD generation; it does not replace repository inspection, platform certification, or the live backend/API contract.
+This pack is a reusable instruction and requirements baseline. The PRD author must inspect the current repository and distinguish documented intent from implemented and certified behavior.
