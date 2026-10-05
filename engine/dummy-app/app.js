@@ -47,9 +47,14 @@ function mascot(src, type = "check") {
 }
 
 function segmentedCode(value = "") {
-  const clean = String(value).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20);
+  const clean = String(value).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 18);
+  const lengths = [3, 3, 4, 4, 4];
   const parts = [];
-  for (let i = 0; i < 5; i++) parts.push(clean.slice(i * 4, i * 4 + 4));
+  let offset = 0;
+  for (const len of lengths) {
+    parts.push(clean.slice(offset, offset + len));
+    offset += len;
+  }
   return parts;
 }
 
