@@ -33,3 +33,18 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Smoke test published site
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          echo "Smoke testing $PAGE_URL"
+          for i in {1..20}; do
+            if curl --fail --silent --show-error --location --max-time 15 "$PAGE_URL" | grep -q "Rizog Labs Studio"; then
+              echo "Published site is responding correctly."
+              exit 0
+            fi
+            echo "Waiting for Pages propagation ($i/20)..."
+            sleep 3
+          done
+          echo "Published site smoke test failed."
+          exit 1
