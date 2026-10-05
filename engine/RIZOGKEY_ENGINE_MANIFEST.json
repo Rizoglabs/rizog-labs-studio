@@ -2,7 +2,7 @@
   "product": "RizogKey Engine",
   "vendor": "Rizog Labs",
   "product_type": "Reusable Licensing Engine",
-  "engine_version": "1.0.0-rc.1",
+  "engine_version": "1.0.0",
   "protocol_version": 1,
   "integration_mode": "Client SDK / Adapter",
   "admin_control_plane": "Rizog Labs Studio",
@@ -29,8 +29,14 @@
     "LIFETIME"
   ],
   "offline_grace_days_default": 90,
-  "status": "RELEASE_CANDIDATE",
-  "release_channel": "rc",
-  "do_not_embed_until_engine_validation": true,
-  "stable_gate": "engine/STABLE_RELEASE_GATE.md"
+  "status": "STABLE",
+  "release_channel": "stable",
+  "do_not_embed_until_engine_validation": false,
+  "stable_gate_date": "2026-10-05",
+  "stable_gate_evidence": {
+    "github_actions_run": 83,
+    "backend_certification": "PASS",
+    "browser_certification": "PASS",
+    "protocol_version": 1
+  }
 }
