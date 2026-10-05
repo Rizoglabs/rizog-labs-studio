@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f766e">
+    <title>Rizog Labs Studio — RizogKey V1</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body class="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
+    <div id="auth-screen" class="fixed inset-0 z-[100] bg-gray-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white rounded-2xl border border-gray-200 shadow-xl p-6 sm:p-8">
+            <div class="mb-7">
+                <h1 class="text-2xl font-black tracking-tight text-gray-900">RIZOG<span class="text-teal-600">LABS</span></h1>
+                <p class="text-xs text-gray-400 font-medium tracking-widest mt-1 uppercase">Studio Control Center V1</p>
+            </div>
+            <div class="mb-6">
+                <p class="text-lg font-bold text-gray-900">Rizog Labs Studio</p>
+                <p class="text-sm text-gray-500 mt-1">Login menggunakan email untuk mengakses Control Center dan mesin RizogKey.</p>
+            </div>
+            <form id="login-form" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Email</label>
+                    <input id="login-email" type="email" required autocomplete="email" placeholder="admin@rizoglabs..." class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Password</label>
+                    <input id="login-password" type="password" required autocomplete="current-password" placeholder="Password" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all font-medium">
+                </div>
+                <p id="login-error" class="hidden text-sm text-red-600 font-medium"></p>
+                <button id="login-button" type="submit" class="w-full bg-gray-900 hover:bg-teal-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all">LOGIN TO STUDIO</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="sidebar-overlay" data-action="close-sidebar" class="sidebar-overlay"></div>
+
+    <aside id="app-sidebar" class="app-sidebar w-64 bg-white border-r border-gray-200 flex flex-col justify-between shrink-0">
+        <div>
+            <div class="p-4 sm:p-6 flex items-start justify-between gap-3">
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight text-gray-900">RIZOG<span class="text-teal-600">LABS</span></h1>
+                    <p class="text-xs text-gray-400 font-medium tracking-widest mt-1 uppercase">Control Center V1</p>
+                </div>
+                <button type="button" aria-label="Close navigation" data-action="close-sidebar" class="lg:hidden w-9 h-9 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 flex items-center justify-center">
+                    <span class="text-xl leading-none">×</span>
+                </button>
+            </div>
+            <nav class="mt-4 px-4 space-y-2">
+                <button type="button" id="nav-dashboard" data-tab="dashboard" class="w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-colors text-gray-500 hover:bg-gray-50 hover:text-gray-900">Dashboard</button>
+                <button type="button" id="nav-generator" data-tab="generator" class="w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-colors bg-teal-50 text-teal-700">Activation Generator</button>
+                <button type="button" id="nav-history" data-tab="history" class="w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-colors text-gray-500 hover:bg-gray-50 hover:text-gray-900">Activation History</button>
+            </nav>
+        </div>
+        <div class="p-4 sm:p-6 border-t border-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-white font-bold text-xs">AD</div>
+                <div>
+                    <p id="admin-email" class="text-sm font-bold truncate max-w-[180px]">Studio User</p>
+                    <button type="button" data-action="sign-out" class="text-xs text-gray-500 hover:text-red-500 cursor-pointer transition-colors">Log out</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-auto flex flex-col relative min-w-0">
+        <header class="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 flex justify-between items-center gap-3 sticky top-0 z-20">
+            <div class="flex items-center gap-3 min-w-0">
+                <button type="button" aria-label="Open navigation" data-action="open-sidebar" class="mobile-menu-btn w-10 h-10 shrink-0 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 items-center justify-center">
+                    <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <h2 id="header-title" class="text-lg sm:text-xl font-bold text-gray-800 truncate mobile-compact-title">Generate New Activation</h2>
+            </div>
+            <span id="connection-badge" class="draft-badge bg-yellow-400 text-yellow-900 text-[10px] sm:text-xs font-bold px-2.5 sm:px-3 py-1 rounded-full uppercase tracking-wide whitespace-nowrap">Draft Baseline</span>
+        </header>
+
+        <div class="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto w-full">
+            <div id="view-dashboard" class="hidden">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-teal-50 rounded-bl-full -mr-4 -mt-4"></div>
+                        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Generated</p>
+                        <p id="stat-generated" class="text-4xl font-black text-gray-900">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-yellow-50 rounded-bl-full -mr-4 -mt-4"></div>
+                        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Used</p>
+                        <p id="stat-used" class="text-4xl font-black text-gray-900">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-red-50 rounded-bl-full -mr-4 -mt-4"></div>
+                        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Revoked</p>
+                        <p id="stat-revoked" class="text-4xl font-black text-gray-900">0</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <p class="text-lg font-bold">Activation Control Center</p>
+                            <p class="text-sm text-gray-500 mt-1">RizogKey V1 terhubung ke backend Supabase. History tersimpan terpusat dan dapat diakses dari perangkat internal.</p>
+                        </div>
+                        <button type="button" data-tab="generator" class="bg-gray-900 hover:bg-teal-600 text-white font-bold px-5 py-3 rounded-xl transition-all shadow">GENERATE ACTIVATION</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-generator" class="block">
+                <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+                    <div class="w-full lg:w-2/3 bg-white p-5 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
+                        <form id="activation-form" class="space-y-6">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Product</label>
+                                    <select id="input-product" class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 font-semibold focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all">
+                                        <option value="RUPKAS">RupKas</option>
+                                        <option value="POS" disabled>POS (Coming Soon)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">License Duration</label>
+                                    <select id="input-duration" class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 font-semibold focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all">
+                                        <option value="1M">1 Bulan</option>
+                                        <option value="6M">6 Bulan</option>
+                                        <option value="1Y">1 Tahun</option>
+                                        <option value="LIFETIME" selected>Selamanya</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Customer Name</label>
+                                <input id="input-customer" type="text" required autocomplete="off" placeholder="e.g. Budi Santoso" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all font-medium" />
+                            </div>
+                            <div>
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide">Installation Code</label>
+                                    <button type="button" data-action="generate-test-code" class="text-[11px] font-bold text-teal-700 hover:text-teal-900 border border-teal-200 hover:border-teal-400 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-all">GENERATE TEST CODE</button>
+                                </div>
+                                <input id="input-install" type="text" required autocomplete="off" spellcheck="false" maxlength="64" placeholder="e.g. RPK-7K29-X91P-ABCD" style="text-transform:uppercase" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all font-mono tracking-widest text-sm" />
+                                <p class="text-xs text-gray-400 mt-2">Kode asli diberikan customer dari aplikasi yang terinstall. Untuk testing sebelum aplikasi tersedia, gunakan <span class="font-semibold text-gray-500">GENERATE TEST CODE</span>.</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Device Limit</label>
+                                <input type="text" readonly value="1 Device" class="w-full sm:w-2/5 px-4 py-3 rounded-lg border border-gray-200 bg-gray-100 text-gray-500 font-semibold cursor-not-allowed"/>
+                            </div>
+                            <div class="pt-4 border-t border-gray-100">
+                                <button id="btn-submit" type="submit" disabled class="w-full bg-gray-900 hover:bg-teal-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-teal-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-900 flex justify-center items-center gap-2">
+                                    <span id="btn-text">GENERATE ACTIVATION</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="w-full lg:w-1/3">
+                        <div id="result-empty" class="bg-gray-100 border-2 border-dashed border-gray-200 p-6 sm:p-8 rounded-2xl flex flex-col items-center justify-center text-center h-full min-h-[320px] lg:min-h-[430px] text-gray-400">
+                            <div class="w-12 h-12 bg-gray-200 rounded-full mb-4 flex items-center justify-center text-gray-400 font-black">+</div>
+                            <p class="font-semibold">Code Result</p>
+                            <p class="text-sm mt-2 px-4">Activation code akan muncul di sini setelah Anda melakukan generate.</p>
+                        </div>
+                        <div id="result-success" class="hidden bg-teal-600 p-5 sm:p-6 rounded-2xl shadow-xl text-white relative overflow-hidden animate-fade-in min-h-[430px] flex flex-col">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-teal-500 rounded-full blur-2xl -mr-10 -mt-10 opacity-50"></div>
+                            <div class="relative z-10 flex-1 flex flex-col">
+                                <div class="flex items-center gap-2 mb-6">
+                                    <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                                    <span class="text-teal-50 font-bold text-sm tracking-widest uppercase">Activation Ready</span>
+                                </div>
+                                <div class="space-y-4 flex-1">
+                                    <div>
+                                        <p class="text-teal-200 text-xs uppercase tracking-wide font-semibold">Customer</p>
+                                        <p id="display-customer" class="font-bold text-lg">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-teal-200 text-xs uppercase tracking-wide font-semibold">Installation Code</p>
+                                        <p id="display-install" class="font-mono text-sm opacity-90 break-all">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-teal-200 text-xs uppercase tracking-wide font-semibold">License Duration</p>
+                                        <p id="display-duration" class="font-bold text-base">-</p>
+                                    </div>
+                                    <div class="bg-teal-700/50 p-4 rounded-xl border border-teal-500 mt-4">
+                                        <p class="text-teal-200 text-xs uppercase tracking-wide font-semibold text-center mb-1">Activation Code</p>
+                                        <p id="display-code" class="result-code font-mono text-xl font-bold text-center tracking-wider text-yellow-400 break-all">-</p>
+                                    </div>
+                                </div>
+                                <button type="button" id="btn-copy" data-action="copy-code" class="w-full py-3 mt-6 rounded-lg font-bold text-sm transition-all bg-white text-teal-900 hover:bg-gray-100 shadow">COPY CODE</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-history" class="hidden bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="p-4 sm:p-6 border-b border-gray-200 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+                    <input id="history-search" type="text" placeholder="Search customer or code..." class="px-4 py-2 border border-gray-300 rounded-lg text-sm w-full sm:w-64 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                    <div class="flex gap-2">
+                        <select id="history-status" class="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:outline-none">
+                            <option>All Status</option>
+                            <option>GENERATED</option>
+                            <option>USED</option>
+                            <option>REVOKED</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="history-table w-full text-left border-collapse min-w-[780px]">
+                        <thead>
+                            <tr class="bg-gray-50 text-xs uppercase tracking-wider text-gray-500 border-b border-gray-200">
+                                <th class="px-6 py-4 font-semibold">Product</th>
+                                <th class="px-6 py-4 font-semibold">Customer</th>
+                                <th class="px-6 py-4 font-semibold">Install Hint</th>
+                                <th class="px-6 py-4 font-semibold">Duration</th>
+                                <th class="px-6 py-4 font-semibold">Code Hint</th>
+                                <th class="px-6 py-4 font-semibold">Status</th>
+                                <th class="px-6 py-4 font-semibold text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body" class="text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" role="status" aria-live="polite" class="hidden fixed left-4 right-4 sm:left-auto sm:right-6 bottom-4 sm:bottom-6 z-50 px-4 py-3 rounded-xl shadow-lg bg-gray-900 text-white text-sm font-semibold"></div>
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
