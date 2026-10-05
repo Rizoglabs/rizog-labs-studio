@@ -26,6 +26,15 @@ jobs:
           node --check js/app.js
           ! grep -R -n -E "service_role|SUPABASE_SERVICE_ROLE|sb_secret_" js
 
+      - name: Validate RizogKey Integration Pack
+        run: |
+          test -f engine/sdk/INTEGRATION_PACK.md
+          test -f engine/sdk/WEB_INTEGRATION_GUIDE.md
+          test -f engine/sdk/ANDROID_INTEGRATION_GUIDE.md
+          test -f engine/sdk/INTEGRATION_CHECKLIST.md
+          test -f engine/sdk/ERROR_MAPPING.md
+          echo "RizogKey Integration Pack is present."
+
       - name: Validate stable RizogKey manifest
         run: |
           node -e "const m=require('./engine/RIZOGKEY_ENGINE_MANIFEST.json'); if(m.engine_version!=='1.0.0'||m.protocol_version!==1||m.status!=='STABLE'||m.do_not_embed_until_engine_validation!==false) process.exit(1); console.log('RizogKey Engine 1.0.0 STABLE manifest validated.');"
