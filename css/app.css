@@ -1,0 +1,33 @@
+@keyframes fadeInSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fadeInSlideUp 0.4s ease-out forwards; }
+.toast-enter { animation: toastIn 0.25s ease-out forwards; }
+.toast-leave { animation: toastOut 0.25s ease-in forwards; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(8px); } }
+::selection { background: rgba(13, 148, 136, .18); }
+html, body { min-height: 100%; }
+body { -webkit-tap-highlight-color: transparent; }
+.sidebar-overlay { display: none; }
+.mobile-menu-btn { display: none; }
+@media (max-width: 1023px) {
+  .mobile-menu-btn { display: inline-flex; }
+  .app-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 40; width: min(20rem, 86vw); transform: translateX(-100%); transition: transform .25s ease; box-shadow: 12px 0 30px rgba(15, 23, 42, .10); }
+  .app-sidebar.is-open { transform: translateX(0); }
+  .sidebar-overlay { position: fixed; inset: 0; z-index: 30; background: rgba(15, 23, 42, .36); backdrop-filter: blur(2px); }
+  .sidebar-overlay.is-open { display: block; }
+}
+@media (max-width: 639px) {
+  .mobile-compact-title { font-size: 1rem; line-height: 1.25rem; }
+  .draft-badge { padding-left: .625rem; padding-right: .625rem; }
+  .result-code { font-size: 1rem !important; line-height: 1.5rem !important; }
+  .history-table { min-width: 680px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+.app-surface { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 1rem; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); }
+.app-focus-ring:focus-visible { outline: 2px solid rgba(13, 148, 136, 0.55); outline-offset: 2px; }
+button:disabled { cursor: not-allowed; }
