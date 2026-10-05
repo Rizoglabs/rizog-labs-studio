@@ -51,7 +51,7 @@ Every consumer app needs one registered product identity.
 - Do not change a Product Code after production use without a migration plan.
 - Keep a new product INACTIVE until identity, integration, and compatibility values are confirmed. Make it ACTIVE only when ready for new provisioning.
 - Do not hard-delete production products. Use INACTIVE or ARCHIVED to retain historical relationships.
-- Do not create product, customer, installation, or license databases in the consumer app.
+- Do not create a parallel licensing database or duplicate RizogKey product, installation, activation, or license records in the consumer app. The app may store its own business data.
 
 Include this block in the PRD. Unknown values remain TBD.
 
