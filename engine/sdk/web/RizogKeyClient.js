@@ -70,9 +70,11 @@ export class RizogKeyClient {
     if (!config?.productCode) throw new Error("RK_PRODUCT_REQUIRED");
     if (!config?.apiUrl) throw new Error("RK_API_URL_REQUIRED");
     if (!config?.trustedSigningKeys) throw new Error("RK_TRUSTED_SIGNING_KEYS_REQUIRED");
+    if (!config?.publishableKey) throw new Error("RK_PUBLISHABLE_KEY_REQUIRED");
 
     this.productCode = String(config.productCode).trim().toUpperCase();
     this.apiUrl = String(config.apiUrl).trim();
+    this.publishableKey = String(config.publishableKey).trim();
     this.platform = String(config.platform || "web").trim().toLowerCase();
     this.clientVersion = String(config.clientVersion || "1.0.0").trim();
     this.trustedSigningKeys = config.trustedSigningKeys;
@@ -80,6 +82,7 @@ export class RizogKeyClient {
     this.dbName = config.storageNamespace || `rizogkey:${this.productCode}`;
     this.identity = null;
     this.state = null;
+    this.integrityError = null;
   }
 
   async initialize() {
@@ -87,6 +90,20 @@ export class RizogKeyClient {
 
     this.identity = await dbGet(this.dbName, "identity");
     this.state = await dbGet(this.dbName, "license");
+    if (this.state) {
+      try {
+        await this._verifySignedGrant(
+          this.state.grant,
+          this.state.signature,
+          this.state.signingKeyVersion,
+          this.state.signingPublicKey,
+        );
+      } catch (error) {
+        this.integrityError = error?.message || "RK_GRANT_INVALID";
+        this.state = null;
+        await dbDelete(this.dbName, "license");
+      }
+    }
 
     if (!this.identity) {
       const keyPair = await crypto.subtle.generateKey({ name: "Ed25519" }, false, ["sign", "verify"]);
@@ -110,7 +127,7 @@ export class RizogKeyClient {
 
   getStatus() {
     const grant = this.state?.grant;
-    if (!grant) return "UNACTIVATED";
+    if (!grant) return this.integrityError || "UNACTIVATED";
     if (grant.product_code !== this.productCode) return "PRODUCT_MISMATCH";
     if (grant.status !== "ACTIVE") return grant.status || "UNKNOWN";
     if (grant.expires_at && past(grant.expires_at)) return "EXPIRED";
@@ -128,7 +145,7 @@ export class RizogKeyClient {
     try {
       const response = await fetch(this.apiUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json", apikey: this.publishableKey },
         body: JSON.stringify(body),
         signal: controller.signal,
       });
@@ -144,14 +161,16 @@ export class RizogKeyClient {
     }
   }
 
-  async _accept(data) {
-    const grant = data?.license_grant;
-    const signature = data?.signature;
-    const keyVersion = Number(data?.signing?.key_version || 0);
-    const publicKey = String(data?.signing?.public_key || "");
-
+  async _verifySignedGrant(grant, signature, keyVersion, publicKey, expected = {}) {
     if (!grant || !signature || !keyVersion || !publicKey) throw new Error("RK_SIGNED_GRANT_REQUIRED");
+    if (Number(grant.version) !== 1) throw new Error("RK_PROTOCOL_UNSUPPORTED");
     if (grant.product_code !== this.productCode) throw new Error("RK_PRODUCT_MISMATCH");
+    if (expected.installationId && grant.installation_id !== expected.installationId) {
+      throw new Error("RK_INSTALLATION_MISMATCH");
+    }
+    if (expected.licenseId && grant.license_id !== expected.licenseId) {
+      throw new Error("RK_LICENSE_MISMATCH");
+    }
 
     const trusted = this.trustedSigningKeys[keyVersion];
     if (!trusted || trusted !== publicKey) throw new Error("RK_SIGNING_KEY_UNTRUSTED");
@@ -164,6 +183,15 @@ export class RizogKeyClient {
       new TextEncoder().encode(canonicalize(grant)),
     );
     if (!valid) throw new Error("RK_GRANT_INVALID");
+  }
+
+  async _accept(data, expected = {}) {
+    const grant = data?.license_grant;
+    const signature = data?.signature;
+    const keyVersion = Number(data?.signing?.key_version || 0);
+    const publicKey = String(data?.signing?.public_key || "");
+
+    await this._verifySignedGrant(grant, signature, keyVersion, publicKey, expected);
 
     this.state = {
       grant,
@@ -173,6 +201,7 @@ export class RizogKeyClient {
       updatedAt: isoNow(),
     };
     await dbPut(this.dbName, "license", this.state);
+    this.integrityError = null;
   }
 
   async activate(activationCode) {
@@ -201,7 +230,7 @@ export class RizogKeyClient {
       public_key: this.identity?.publicKey || null,
       client_version: this.clientVersion,
     });
-    await this._accept(data);
+    await this._accept(data, { licenseId: grant.license_id, installationId: grant.installation_id });
     return this.getLicense();
   }
 
@@ -210,5 +239,6 @@ export class RizogKeyClient {
     await dbDelete(this.dbName, "identity");
     this.identity = null;
     this.state = null;
+    this.integrityError = null;
   }
 }

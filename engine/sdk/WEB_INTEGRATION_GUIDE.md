@@ -35,15 +35,16 @@ import { RizogKeyClient } from "./RizogKeyClient.js";
 const client = new RizogKeyClient({
   productCode: "YOUR_PRODUCT_CODE",
   apiUrl: "https://nddipymcyeargsdbulyo.supabase.co/functions/v1/rizogkey-client",
+  publishableKey: "sb_publishable_kkgCQkdmeyiMW4Tt_YVi7w_ff1ZVcz_",
   platform: "web",
   clientVersion: "1.0.0",
   trustedSigningKeys: {
-    1: "<TRUSTED_ED25519_PUBLIC_KEY_BASE64>"
+    1: "UnS601AB8gu4rxNrwcuz+m9WIOt7+43Pa2c3uLPWD8k="
   }
 });
 ```
 
-The trusted signing key is application configuration. Do not take a key from an untrusted runtime response and then trust it.
+The Supabase publishable key and Ed25519 signing public key are public configuration values. Never embed a secret/service-role key or signing private seed. Pin trusted signing keys from the reviewed engine configuration; do not trust a key solely because the server returned it.
 
 ## 4. First launch
 
@@ -148,7 +149,7 @@ Do not hardcode business-specific offline policies in the host application.
 
 The reference SDK uses IndexedDB.
 
-The host app must test:
+The client verifies the cached signed grant during initialize and fails closed if the grant is altered or signed by an untrusted key. The host app must test:
 
 - refresh;
 - browser restart;

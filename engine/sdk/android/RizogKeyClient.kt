@@ -26,6 +26,7 @@ class RizogKeyClient(
     private val apiUrl: String,
     private val clientVersion: String,
     private val trustedSigningKeys: Map<Int, String>,
+    private val publishableKey: String = "",
 ) {
     companion object {
         private const val KEY_ALIAS_PREFIX = "rizogkey.install."
@@ -42,6 +43,7 @@ class RizogKeyClient(
     private val alias = KEY_ALIAS_PREFIX + productCode.uppercase()
 
     @Volatile private var keyPair: KeyPair? = null
+    @Volatile private var integrityError: String? = null
 
     fun initialize(): RizogKeyClient {
         require(Build.VERSION.SDK_INT >= 33) { "RK_ANDROID_CRYPTO_UNAVAILABLE" }
@@ -50,6 +52,17 @@ class RizogKeyClient(
             val code = "RPK-INST-" + randomPart(5) + "-" + randomPart(5)
             prefs.edit().putString(INSTALLATION_CODE, code).apply()
         }
+        val cached = getLicense()
+        if (cached != null) {
+            val signature = prefs.getString(LICENSE_SIGNATURE, null).orEmpty()
+            val keyVersion = prefs.getInt(SIGNING_KEY_VERSION, 0)
+            try {
+                verifyGrant(cached, signature, keyVersion)
+            } catch (error: Exception) {
+                integrityError = error.message ?: "RK_GRANT_INVALID"
+                prefs.edit().remove(LICENSE_JSON).remove(LICENSE_SIGNATURE).remove(SIGNING_KEY_VERSION).apply()
+            }
+        }
         return this
     }
 
@@ -57,7 +70,7 @@ class RizogKeyClient(
         prefs.getString(INSTALLATION_CODE, null) ?: error("RK_NOT_INITIALIZED")
 
     fun getStatus(): String {
-        val raw = prefs.getString(LICENSE_JSON, null) ?: return "UNACTIVATED"
+        val raw = prefs.getString(LICENSE_JSON, null) ?: return integrityError ?: "UNACTIVATED"
         val grant = JSONObject(raw)
         if (grant.optString("product_code") != productCode.uppercase()) return "PRODUCT_MISMATCH"
         if (grant.optString("status") != "ACTIVE") return grant.optString("status", "UNKNOWN")
@@ -85,6 +98,7 @@ class RizogKeyClient(
                 .put("public_key", publicKeyBase64())
                 .put("client_version", clientVersion)
         )
+        integrityError = null
         return acceptSignedGrant(data)
     }
 
@@ -99,7 +113,7 @@ class RizogKeyClient(
                 .put("public_key", publicKeyBase64())
                 .put("client_version", clientVersion)
         )
-        return acceptSignedGrant(data)
+        return acceptSignedGrant(data, grant.getString("installation_id"), grant.getString("license_id"))
     }
 
     fun clearLocalState() {
@@ -113,6 +127,7 @@ class RizogKeyClient(
             KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.deleteEntry(alias)
         }
         keyPair = null
+        integrityError = null
     }
 
     private fun loadOrCreateKeyPair() {
@@ -138,38 +153,55 @@ class RizogKeyClient(
         return Base64.encodeToString(publicKey.encoded, Base64.NO_WRAP)
     }
 
-    private fun acceptSignedGrant(data: JSONObject): JSONObject {
+    private fun acceptSignedGrant(
+        data: JSONObject,
+        expectedInstallationId: String? = null,
+        expectedLicenseId: String? = null,
+    ): JSONObject {
         val grant = data.optJSONObject("license_grant") ?: error("RK_SIGNED_GRANT_REQUIRED")
         val signatureB64 = data.optString("signature")
-        val keyVersion = data.optInt("signing_key_version", data.optJSONObject("signing")?.optInt("key_version", 0) ?: 0)
+        val keyVersion = data.optJSONObject("signing")?.optInt("key_version", 0) ?: 0
         val signing = data.optJSONObject("signing")
         val signingPublicKey = signing?.optString("public_key").orEmpty()
 
-        if (signatureB64.isBlank() || signingPublicKey.isBlank() || keyVersion == 0) {
-            error("RK_SIGNED_GRANT_REQUIRED")
-        }
-        if (grant.optString("product_code") != productCode.uppercase()) error("RK_PRODUCT_MISMATCH")
-
-        val trusted = trustedSigningKeys[keyVersion]
-        if (trusted == null || trusted != signingPublicKey) error("RK_SIGNING_KEY_UNTRUSTED")
-
-        val publicKey = KeyFactory.getInstance("Ed25519")
-            .generatePublic(X509EncodedKeySpec(ed25519Spki(Base64.decode(signingPublicKey, Base64.DEFAULT))))
-
-        val verifier = Signature.getInstance("Ed25519")
-        verifier.initVerify(publicKey)
-        verifier.update(canonicalize(grant).toByteArray(StandardCharsets.UTF_8))
-        if (!verifier.verify(Base64.decode(signatureB64, Base64.DEFAULT))) {
-            error("RK_GRANT_INVALID")
-        }
+        verifyGrant(grant, signatureB64, keyVersion, signingPublicKey, expectedInstallationId, expectedLicenseId)
 
         prefs.edit()
             .putString(LICENSE_JSON, grant.toString())
             .putString(LICENSE_SIGNATURE, signatureB64)
             .putInt(SIGNING_KEY_VERSION, keyVersion)
             .apply()
-
+        integrityError = null
         return grant
+    }
+
+    private fun verifyGrant(
+        grant: JSONObject,
+        signatureB64: String,
+        keyVersion: Int,
+        responsePublicKey: String? = null,
+        expectedInstallationId: String? = null,
+        expectedLicenseId: String? = null,
+    ) {
+        if (signatureB64.isBlank() || keyVersion == 0) error("RK_SIGNED_GRANT_REQUIRED")
+        if (grant.optInt("version", 0) != 1) error("RK_PROTOCOL_UNSUPPORTED")
+        if (grant.optString("product_code") != productCode.uppercase()) error("RK_PRODUCT_MISMATCH")
+        if (expectedInstallationId != null && grant.optString("installation_id") != expectedInstallationId) {
+            error("RK_INSTALLATION_MISMATCH")
+        }
+        if (expectedLicenseId != null && grant.optString("license_id") != expectedLicenseId) {
+            error("RK_LICENSE_MISMATCH")
+        }
+
+        val trusted = trustedSigningKeys[keyVersion] ?: error("RK_SIGNING_KEY_UNTRUSTED")
+        if (responsePublicKey != null && responsePublicKey != trusted) error("RK_SIGNING_KEY_UNTRUSTED")
+
+        val publicKey = KeyFactory.getInstance("Ed25519")
+            .generatePublic(X509EncodedKeySpec(ed25519Spki(Base64.decode(trusted, Base64.DEFAULT))))
+        val verifier = Signature.getInstance("Ed25519")
+        verifier.initVerify(publicKey)
+        verifier.update(canonicalize(grant).toByteArray(StandardCharsets.UTF_8))
+        if (!verifier.verify(Base64.decode(signatureB64, Base64.DEFAULT))) error("RK_GRANT_INVALID")
     }
 
     private fun canonicalize(value: Any?): String {
@@ -198,6 +230,7 @@ class RizogKeyClient(
             doOutput = true
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("Accept", "application/json")
+            if (publishableKey.isNotBlank()) setRequestProperty("apikey", publishableKey)
         }
 
         return try {

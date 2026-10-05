@@ -2,7 +2,7 @@
 
 ## 1. Scope
 
-Use the Android adapter boundary for a native Android product.
+Use the Android adapter boundary for a native Android application. See [ANDROID_QUICKSTART.md](ANDROID_QUICKSTART.md) for a working configuration, API key, pinned signing key, threading, and activation example.
 
 Reference:
 
@@ -109,6 +109,8 @@ Network failure is not the same state as:
 - REVALIDATION_REQUIRED.
 
 ## 8. Secure storage
+
+The adapter verifies the signed License Grant both when received and when restoring cached state. It verifies the expected license and installation IDs on revalidation.
 
 The adapter must keep installation private key material in platform-secure key storage.
 

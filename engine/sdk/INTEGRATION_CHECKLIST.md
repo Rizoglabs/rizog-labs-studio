@@ -2,7 +2,7 @@
 
 ## A. Planning
 
-- [ ] Product Code is unique.
+- [ ] Product Code is unique and registered in Rizog Labs Studio.
 - [ ] Product Name is defined.
 - [ ] Platform adapter is selected.
 - [ ] Client version is defined.
@@ -17,9 +17,12 @@
 - [ ] No service-role secret is in client code.
 - [ ] No signing private key/seed is in client code.
 - [ ] Client does not access licensing tables directly.
-- [ ] Trusted signing-key map is configured.
+- [ ] Supabase publishable API key is configured in the apikey header.
+- [ ] Trusted signing-key map is pinned from a reviewed source (not accepted from the API response).
 - [ ] Client rejects an untrusted key version.
 - [ ] Client verifies License Grant signature.
+- [ ] Client verifies the cached grant signature again during initialization.
+- [ ] Revalidation result matches the current license and installation IDs.
 - [ ] Client verifies Product Code binding.
 - [ ] Client persists only client-safe licensing state.
 - [ ] Licensing secrets are absent from logs.
@@ -60,7 +63,7 @@
 
 ## G. Persistence
 
-- [ ] App/browser restart preserves valid local state.
+- [ ] App/browser restart preserves valid local state only after signature verification.
 - [ ] Local storage failure is handled.
 - [ ] Clear local state produces a fresh activation flow.
 - [ ] No license state is silently copied to another installation.

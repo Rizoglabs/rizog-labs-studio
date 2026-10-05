@@ -20,6 +20,9 @@ Use internal engine errors for application logic and map them to customer-facing
 | LICENSE_EXPIRED / EXPIRED | License expired | Lisensi sudah kedaluwarsa. Perbarui atau aktivasi kembali lisensi. |
 | REVALIDATION_REQUIRED | Offline boundary exceeded | Hubungkan perangkat ke internet untuk memverifikasi lisensi. |
 | RK_LOCAL_STORAGE_UNAVAILABLE | Client cannot persist state | Penyimpanan perangkat/browser tidak tersedia. Periksa izin dan ruang penyimpanan. |
+| RK_PROTOCOL_UNSUPPORTED | Grant protocol version is unsupported | Versi lisensi tidak didukung. Hubungi dukungan. |
+| RK_LICENSE_MISMATCH | Revalidation returned a different license | Lisensi tidak cocok dengan instalasi ini. Hubungi dukungan. |
+| RK_GRANT_INVALID (cached) | Cached License Grant failed signature verification | Status lisensi tidak dapat diverifikasi. Hubungi dukungan. |
 
 ## Rules
 

@@ -5,7 +5,7 @@ This folder is the implementation handoff for integrating RizogKey Engine 1.0.0 
 ## Start here
 
 1. Read `../RIZOGKEY_INTEGRATION_CONTRACT.md`.
-2. Read `WEB_INTEGRATION_GUIDE.md` or `ANDROID_INTEGRATION_GUIDE.md`.
+2. Read `WEB_QUICKSTART.md` or `ANDROID_QUICKSTART.md`, then review the matching integration guide.
 3. Copy the product configuration template below into the new application's planning/architecture document.
 4. Complete `INTEGRATION_CHECKLIST.md`.
 5. Use `ERROR_MAPPING.md` for customer-facing error handling.
@@ -50,6 +50,8 @@ clearLocalState()
 ```
 
 The host application must not access RizogKey licensing tables directly.
+
+The current public Edge Function source is tracked at `../../supabase/functions/rizogkey-client/`. It is invoked without a user JWT because activation codes are the caller credential; `verify_jwt = false` is intentional. The handler still validates every request and keeps privileged database access server-side.
 
 ## Release lock
 
