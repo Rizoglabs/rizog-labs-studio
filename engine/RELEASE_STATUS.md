@@ -1,11 +1,11 @@
 # RizogKey Engine — Release Status
 
-## Version
+## Release candidate
 
-RizogKey Engine: 1.0.0-alpha  
+RizogKey Engine: 1.0.0-rc.1  
 RizogKey Protocol: V1
 
-## Implemented backend capabilities
+## Backend capabilities
 
 - Activation Code generation through Rizog Labs Studio
 - Installation records
@@ -16,7 +16,10 @@ RizogKey Protocol: V1
 - Revoke lifecycle
 - License event audit trail
 - Signed License Grant infrastructure
-- Web-facing RizogKey Client API
+- Canonical signed-grant serialization
+- Trusted signing-key pinning in clients
+- Web client adapter
+- Android adapter reference
 - Standalone Dummy App certification target
 
 ## Current backend endpoints
@@ -33,26 +36,20 @@ Supported actions:
 
 Administrative operations remain behind Rizog Labs Studio.
 
-## Dummy App
+## Current release gates
 
-Location:
-
-    engine/dummy-app/
-
-Purpose:
-
-The Dummy App is the first consumer of the engine contract and is used only for certification/regression testing.
-
-It is not a customer product.
+The RC gate requires the published Dummy App browser certification to remain green after the security hardening changes, plus backend lifecycle certification and the documented device-transfer/compatibility gates.
 
 ## Production application policy
 
 No production customer application is currently designated as a RizogKey Engine consumer.
 
-RupKas is explicitly excluded from engine development/testing at this stage.
+RupKas remains explicitly excluded until the stable release gate is completed.
 
-## Next engine milestone
+## Release decision
 
-Certify the Dummy App against the complete test matrix, then move the engine from ALPHA toward BETA.
+Current status:
 
-Only after the engine passes certification should an actual customer application integrate it.
+    RELEASE CANDIDATE — 1.0.0-rc.1
+
+The engine must not be labeled STABLE until the stable release gate is green for this release candidate.
