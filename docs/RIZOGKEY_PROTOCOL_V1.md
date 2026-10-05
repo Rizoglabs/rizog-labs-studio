@@ -46,7 +46,7 @@ The server is authoritative for license state. The client maintains a signed loc
 
 ### 3.1 Product
 
-Identifies an application sold by Rizog Labs.
+Identifies an application registered by Rizog Labs Studio.
 
 Required:
 - product_id
@@ -54,10 +54,27 @@ Required:
 - product_name
 - status
 
-Example:
-- product_code: RUPKAS
-- product_name: RupKas
+Recommended registry metadata:
+- display_name
+- brand
+- platform
+- description
+- current_version
+- rizogkey_engine_version
+- rizogkey_protocol_version
+- created_at
+- updated_at
 
+The Product Code is a unique, stable technical identifier (uppercase snake case). It binds a consumer app to its product. It is not a display label or secret. Product Codes are immutable after creation; changing one requires a migration plan covering activations, licenses, installations, client compatibility, and rollback.
+
+Product lifecycle statuses:
+- ACTIVE — may be used for new provisioning.
+- INACTIVE — remains registered; new provisioning is disabled.
+- ARCHIVED — no longer sold or maintained; historical relationships are retained.
+
+Product, Installation, License, and Activation are separate objects. One product can have many installations and licenses. Rizog Labs Studio owns product metadata; RizogKey/backend remains authoritative for licensing and installation state.
+
+For Invoice Maker, the intended Product Code is `INVOICE_MAKER`. Register it only after verifying the app and backend compatibility values.
 ### 3.2 Installation
 
 Identifies one application installation.
