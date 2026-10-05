@@ -1,7 +1,7 @@
 import { RizogKeyDummyClient } from "./rizogkey-client.js";
 const PRODUCT="RUPKAS";
 const root=document.getElementById("dummy-app-root");
-let client=new RizogKeyDummyClient(PRODUCT);
+let client=new RizogKeyDummyClient(PRODUCT,{trustedSigningKeys:globalThis.__RIZOGKEY_TEST_CONFIG__?.trustedSigningKeys});
 let currentView="input";
 const templates=new Map();
 
@@ -107,6 +107,6 @@ async function renderFailure(err){
   document.getElementById("btn-scan-failure")?.addEventListener("click",()=>alert("Pemindaian QR akan tersedia pada adapter produksi."));
   document.getElementById("btn-support")?.addEventListener("click",()=>alert("Hubungi dukungan pemilik toko."));
 }
-window.__RIZOGKEY_TEST__={renderInput,renderSuccess,renderFailure,assembleCode};
+window.__RIZOGKEY_TEST__={renderInput,renderSuccess,renderFailure,assembleCode,client:()=>client};
 await client.initialize();
 if(client.status()==="ACTIVE") await renderSuccess(); else await renderInput();
