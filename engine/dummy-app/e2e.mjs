@@ -210,7 +210,7 @@ console.log("PASS revoke state");
 responseMode = "bad_signature";
 const badSig = await page.evaluate(() => window.__RIZOGKEY_TEST__.client().revalidate().then(() => "NO_ERROR").catch(e => e.message));
 assert.equal(badSig, "RK_GRANT_INVALID");
-assert.equal(await page.evaluate(() => window.__RIZOGKEY_TEST__.client().status()), "EXPIRED");
+assert.equal(await page.evaluate(() => window.__RIZOGKEY_TEST__.client().status()), "REVOKED");
 console.log("PASS invalid signature rejection");
 
 responseMode = "untrusted_key";
