@@ -109,6 +109,8 @@ await page.locator("#activationCodeUi").fill("RPK-ACT-DUMMY-0001");
 await page.locator("#verifyBtn").click();
 await page.waitForTimeout(300);
 
+const activationLog = await page.locator("#log").textContent();
+console.log("ACTIVATION LOG", activationLog);
 assert.equal(await page.locator("#statusBadge").textContent(), "ACTIVE");
 assert.equal(await page.locator(".success-title").innerText(), "Aktivasi Berhasil!");
 assert.equal(await page.locator(".active-chip").innerText(), "Aktif");
