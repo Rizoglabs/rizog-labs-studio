@@ -2,6 +2,15 @@ const API = "https://nddipymcyeargsdbulyo.supabase.co/functions/v1/rizogkey-clie
 const DB = "rizogkey-dummy";
 const STORE = "state";
 const CLIENT_VERSION = "dummy-1.0.0";
+function canonicalize(value) {
+  if (Array.isArray(value)) return "[" + value.map((item) => canonicalize(item)).join(",") + "]";
+  if (value && typeof value === "object") {
+    const record = value;
+    return "{" + Object.keys(record).sort().map((key) => JSON.stringify(key) + ":" + canonicalize(record[key])).join(",") + "}";
+  }
+  return JSON.stringify(value);
+}
+
 const DEFAULT_TRUSTED_SIGNING_KEYS = {
   1: "UnS601AB8gu4rxNrwcuz+m9WIOt7+43Pa2c3uLPWD8k=",
 };
@@ -196,7 +205,7 @@ export class RizogKeyDummyClient {
       { name: "Ed25519" },
       signingKey,
       u8(signature),
-      new TextEncoder().encode(JSON.stringify(grant)),
+      new TextEncoder().encode(canonicalize(grant)),
     );
     if (!valid) throw new Error("RK_GRANT_INVALID");
 
