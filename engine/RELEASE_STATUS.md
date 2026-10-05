@@ -1,55 +1,59 @@
 # RizogKey Engine — Release Status
 
-## Release candidate
+## Stable release
 
-RizogKey Engine: 1.0.0-rc.1  
+RizogKey Engine: 1.0.0  
 RizogKey Protocol: V1
 
-## Backend capabilities
+## Status
+
+**STABLE**
+
+The standalone engine certification gate is complete.
+
+## Certified capabilities
 
 - Activation Code generation through Rizog Labs Studio
-- Installation records
-- License records
-- License-to-installation binding
+- Installation identity
+- Installation/license binding
 - Activation lifecycle
+- Activation Code reuse protection
 - Revalidation lifecycle
-- Revoke lifecycle
-- License event audit trail
-- Signed License Grant infrastructure
-- Canonical signed-grant serialization
-- Trusted signing-key pinning in clients
-- Web client adapter
+- Revocation detection
+- Expiration detection
+- Signed License Grants
+- Canonical Grant signing payload
+- Trusted signing-key pinning
+- Web Crypto verification
+- Browser persistence
+- Offline grace state evaluation
+- Network-loss handling
+- Device transfer runbook
+- Web SDK reference implementation
 - Android adapter reference
-- Standalone Dummy App certification target
+- Dummy App regression suite
 
-## Current backend endpoints
+## Stable gate evidence
 
-RizogKey Client API:
+- GitHub Actions run: #83
+- Published Dummy App smoke test: PASS
+- Browser certification: PASS
+- Backend lifecycle certification: PASS
+- Protocol: V1
 
-    https://nddipymcyeargsdbulyo.supabase.co/functions/v1/rizogkey-client
+## Production integration policy
 
-Supported actions:
+RizogKey Engine 1.0.0 is now the standard reusable licensing dependency for new Rizog Labs products.
 
-- activate
-- revalidate
-- health
+RupKas remains intentionally excluded from engine development history; future product planning may consume RizogKey Engine 1.0.0 through the Integration Contract.
 
-Administrative operations remain behind Rizog Labs Studio.
+## Versioning
 
-## Current release gates
+- Engine: 1.0.0
+- Protocol: V1
+- Breaking protocol changes require a new protocol version.
+- Client adapters remain versioned independently from the host application.
 
-The RC gate requires the published Dummy App browser certification to remain green after the security hardening changes, plus backend lifecycle certification and the documented device-transfer/compatibility gates.
+## Next maintenance rule
 
-## Production application policy
-
-No production customer application is currently designated as a RizogKey Engine consumer.
-
-RupKas remains explicitly excluded until the stable release gate is completed.
-
-## Release decision
-
-Current status:
-
-    RELEASE CANDIDATE — 1.0.0-rc.1
-
-The engine must not be labeled STABLE until the stable release gate is green for this release candidate.
+Any modification to licensing protocol, signing, client-state evaluation, activation/revalidation behavior, or adapter security must reopen the stable certification gate before the modified engine can be released.
