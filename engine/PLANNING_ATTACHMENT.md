@@ -1,64 +1,79 @@
 # RizogKey Engine — Planning Attachment
 
-Use this file as a reusable planning attachment whenever a new Rizog Labs application may require licensing.
+Use this file whenever a new Rizog Labs application may require licensing.
 
-## Instruction to the product planner
+## Dependency
 
-This product uses RizogKey Engine as its standard licensing infrastructure.
+Use RizogKey Engine 1.0.0 or the currently approved stable release.
 
-Do not design a new licensing system from scratch.
+Do not design a separate licensing system.
 
-During planning:
+## Planning steps
 
-1. Read the RizogKey Engine manifest.
-2. Read the RizogKey Integration Contract.
-3. Determine the target platform.
-4. Map the application's activation UX to Installation Code + Activation Code.
-5. Keep licensing logic behind the RizogKey Client boundary.
-6. Do not expose the RizogKey brand to customers.
-7. Do not create direct database access from the application to the RizogKey licensing tables.
-8. Identify only the application-specific license behavior that must be configured.
-9. Treat RizogKey Engine as a reusable dependency.
-10. Use a Dummy App for engine validation when the engine version or integration is new.
+1. Read the engine manifest.
+2. Read the Integration Contract.
+3. Select the platform adapter:
+   - web
+   - android
+4. Define:
+   - product_code
+   - product_name
+   - app_version
+   - client_version
+   - device_limit
+   - supported durations
+5. Map the application's activation UI to Installation Code + Activation Code.
+6. Keep all license lifecycle decisions behind RizogKey Client.
+7. Do not expose the RizogKey name to customers.
+8. Do not access RizogKey database tables directly from the application.
+9. Use the Dummy App for engine changes and the host application for product-specific certification.
 
-## Required planning output
-
-The PRD for a new application should contain:
+## Required PRD section
 
 ### Licensing Dependency
 
 - RizogKey Engine version
-- RizogKey Protocol version
+- Protocol version
 - platform adapter
 - product code
-- default device limit
-- supported license durations
+- device limit
+- durations
+- trusted signing-key version(s)
 
 ### Activation UX
 
-- first-launch behavior
-- Installation Code display
-- Activation Code input
-- success behavior
-- invalid-code behavior
-- revoked-license behavior
-- expired-license behavior
-- revalidation-required behavior
+- first launch
+- Installation Code
+- Activation Code
+- activation success
+- invalid code
+- revoked license
+- expired license
+- revalidation required
+- device transfer instructions
 
 ### Technical Boundary
 
-The application must call the RizogKey Client abstraction and must not reimplement license business rules.
+The application consumes:
 
-## Important
+    initialize()
+    getInstallationCode()
+    getStatus()
+    activate(code)
+    revalidate()
+    getLicense()
+    clearLocalState()
 
-RizogKey Engine is a dependency of the product plan, not a reason to redesign the product's business domain.
+The application must not implement a parallel licensing lifecycle.
 
-Example:
+## Customer-facing terms
 
-    RupKas
-      +
-    RizogKey Engine V1
-      =
-    licensed RupKas application
+Use:
 
-RizogKey Engine remains independently versioned.
+- Installation Code
+- Activation Code
+- License
+- Activation
+- Lisensi
+
+Never expose the internal RizogKey name.
