@@ -1,0 +1,32 @@
+{
+  "product": "RizogKey Engine",
+  "vendor": "Rizog Labs",
+  "product_type": "Reusable Licensing Engine",
+  "engine_version": "1.0.0-alpha",
+  "protocol_version": 1,
+  "integration_mode": "Client SDK / Adapter",
+  "admin_control_plane": "Rizog Labs Studio",
+  "customer_facing_brand": false,
+  "customer_facing_terms": [
+    "Installation Code",
+    "Activation Code",
+    "License",
+    "Activation"
+  ],
+  "supported_platform_targets": [
+    "web",
+    "android"
+  ],
+  "production_apps_integrated": [],
+  "test_apps": [],
+  "default_device_limit": 1,
+  "license_durations": [
+    "1M",
+    "6M",
+    "1Y",
+    "LIFETIME"
+  ],
+  "offline_grace_days_default": 90,
+  "status": "ALPHA",
+  "do_not_embed_until_engine_validation": true
+}
