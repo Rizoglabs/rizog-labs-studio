@@ -141,7 +141,7 @@ button:focus-visible,input:focus-visible{outline:3px solid rgba(0,104,95,.14);ou
 .support-row .material-symbols-outlined{font-size:22px}
 .failure-footer{margin:43px -24px -30px;padding:18px 16px 14px;border-top:1px solid #e5eaf0;background:#fff;display:flex;justify-content:center;gap:26px;color:#5b6679;font-size:14px}
 .failure-footer .sep{width:8px;height:8px;border-radius:50%;background:#d8dfdf;margin-top:6px}
-.cert-harness{position:fixed;left:-12000px;top:0;width:420px;padding:10px;opacity:.02;pointer-events:none}
+.cert-harness{position:fixed;left:-12000px;top:0;width:420px;padding:10px;opacity:.02;pointer-events:auto}
 .cert-harness input,.cert-harness button{display:block;width:100%;height:42px;margin-bottom:6px}
 
 @media (max-width:640px){
