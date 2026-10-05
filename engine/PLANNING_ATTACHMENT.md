@@ -2,6 +2,8 @@
 
 Use this file whenever a new Rizog Labs application may require licensing.
 
+For drafting the complete product PRD, attach `PRD_ENGINE_PACK.md` to your PRD prompt. This planning attachment remains the concise licensing checklist; the pack contains the reusable prompt, product decisions, required PRD sections and acceptance criteria.
+
 ## Dependency
 
 Use RizogKey Engine 1.0.0 or the currently approved stable release.

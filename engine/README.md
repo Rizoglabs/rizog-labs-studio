@@ -41,7 +41,9 @@ Customer applications consume RizogKey Engine through the client contract and mu
 
 ## Integration entry point
 
-Start with:
+For product planning, attach `PRD_ENGINE_PACK.md` to the PRD prompt. It gives the product team a copy-ready prompt, required licensing decisions, PRD structure and acceptance criteria.
+
+Start implementation planning with:
 
 - `RIZOGKEY_INTEGRATION_CONTRACT.md`
 - `PLANNING_ATTACHMENT.md`
