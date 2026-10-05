@@ -84,13 +84,19 @@ Use:
 
 ## 6. Integration gate
 
-A production application may integrate the engine only after:
+RizogKey Engine 1.0.0 is STABLE.
 
-1. Engine release is marked STABLE.
+A new production application may integrate it when the host application's platform adapter certification is completed.
+
+The engine-level gate is:
+
+1. Stable engine release.
 2. Dummy App test suite passes.
 3. Activation test passes.
 4. Offline test passes.
 5. Revalidation test passes.
 6. Revoke test passes.
-7. Device transfer test passes.
-8. Compatibility test passes.
+7. Device transfer workflow is documented and executable.
+8. Compatibility contract passes.
+
+The host application must still perform its own Android/Web device, OS, storage and UX regression tests before production release.
