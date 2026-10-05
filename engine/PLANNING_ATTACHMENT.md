@@ -77,3 +77,16 @@ Use:
 - Lisensi
 
 Never expose the internal RizogKey name.
+
+
+## Integration Pack
+
+After the planning section is complete, use:
+
+- `sdk/INTEGRATION_PACK.md`
+- `sdk/WEB_INTEGRATION_GUIDE.md`
+- `sdk/ANDROID_INTEGRATION_GUIDE.md`
+- `sdk/INTEGRATION_CHECKLIST.md`
+- `sdk/ERROR_MAPPING.md`
+
+The application must pin RizogKey Engine 1.0.0 and Protocol V1 unless a newer approved engine release is explicitly selected.
