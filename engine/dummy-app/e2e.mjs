@@ -28,7 +28,7 @@ function makeSignedGrant(privateKey, publicKeyDer) {
   const raw = der.subarray(der.length - 32);
 
   return {
-    grant,
+    license_grant: grant,
     signature: signature.toString("base64"),
     signing: {
       algorithm: "Ed25519",
