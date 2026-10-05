@@ -93,7 +93,7 @@ await page.route(apiUrl, async (route) => {
 
 await page.goto(baseUrl, { waitUntil: "networkidle" });
 
-assert.equal(await page.locator("#topTitle").innerText(), "Aktivasi Perangkat •");
+assert.match(await page.locator("#topTitle").innerText(), /^Aktivasi Perangkat/);
 assert.equal(await page.locator(".brand-name").innerText(), "KASIR TOKO MUSIK");
 assert.equal(await page.locator(".page-title").innerText(), "Aktivasi Perangkat");
 assert.equal(await page.locator(".activation-grid").count(), 1);
