@@ -1,58 +1,57 @@
-# RizogKey Engine — Web SDK
+# RizogKey Engine — Client SDKs
 
-The Web SDK is the reusable client boundary for applications that consume RizogKey Engine.
+RizogKey Engine 1.0.0 exposes a client adapter for Web and Android. Both adapters call the shared Supabase Edge Function; neither application reads licensing tables directly.
 
-## Stable application boundary
+## Pick a platform
 
-```ts
-await client.initialize()
-client.getInstallationCode()
-client.getStatus()
-await client.activate(activationCode)
-await client.revalidate()
-client.getLicense()
-await client.clearLocalState()
+- [API Reference](API_REFERENCE.md)
+- Web: follow [WEB_QUICKSTART.md](WEB_QUICKSTART.md) and use `web/RizogKeyClient.js`.
+- Android: follow [ANDROID_QUICKSTART.md](ANDROID_QUICKSTART.md) and use `android/RizogKeyClient.kt`.
+
+Register the consuming application in Rizog Labs Studio and use its assigned Product Code. The placeholder in the quickstarts must be replaced with that exact code.
+
+## Live API configuration
+
+The current API endpoint is:
+
+```text
+https://nddipymcyeargsdbulyo.supabase.co/functions/v1/rizogkey-client
 ```
 
-## Security
+The public Supabase publishable key may be included in browser and Android client configuration:
 
-The host application must provide a trusted signing-key map. The client does not trust a signing key merely because the server returned it with a grant.
-
-Example:
-
-```js
-import { RizogKeyClient } from "./RizogKeyClient.js";
-
-const client = new RizogKeyClient({
-  productCode: "YOUR_PRODUCT_CODE",
-  clientVersion: "1.0.0",
-  platform: "web",
-  apiUrl: "https://nddipymcyeargsdbulyo.supabase.co/functions/v1/rizogkey-client",
-  trustedSigningKeys: {
-    1: "<TRUSTED_ED25519_PUBLIC_KEY_BASE64>"
-  }
-});
-
-await client.initialize();
+```text
+sb_publishable_kkgCQkdmeyiMW4Tt_YVi7w_ff1ZVcz_
 ```
 
-## Host application responsibilities
+The current License Grant signing key is public and pinned by key version:
 
-The app owns the activation UI and customer-facing messages.
+```text
+key version: 1
+Ed25519 public key (base64): UnS601AB8gu4rxNrwcuz+m9WIOt7+43Pa2c3uLPWD8k=
+```
 
-The engine owns installation identity, license state, signed-grant validation, offline-state evaluation and revalidation.
+Embed only the signing **public** key. Never embed the signing seed/private key, Supabase secret/service-role key, or Studio credentials. On signing-key rotation, update the trusted map through a reviewed application release; do not trust a key solely because it arrived in an API response.
 
-The app must not read licensing tables directly and must not contain a Supabase service-role secret.
+## Stable client boundary
 
-## Customer terminology
+```text
+initialize()
+getInstallationCode()
+getStatus()
+activate(activationCode)
+revalidate()
+getLicense()
+clearLocalState()
+```
 
-Never expose the internal name "RizogKey" to customers. Use:
+Only unlock licensed features when `getStatus() === "ACTIVE"`. Network failure is not a revoke. The client verifies signed grants when received and again when restoring cached state. Keep errors internal and map them to safe messages using [ERROR_MAPPING.md](ERROR_MAPPING.md).
 
-- Installation Code
-- Activation Code
-- License
-- Activation
+## Server and data boundary
 
-## Release rule
-
-The SDK follows the RizogKey Protocol version declared by the engine manifest. Breaking protocol changes require a new protocol version.
+- Client requests go to `rizogkey-client`.
+- Product, installation, activation and license records remain server-side.
+- Studio operations use the authenticated `rizogkey-admin` function.
+- Do not call licensing tables from a client.
+- The SDK's Android network methods are blocking; call them on a background thread.
+- Web integration requires a secure context (HTTPS or localhost), IndexedDB, and Web Crypto.
