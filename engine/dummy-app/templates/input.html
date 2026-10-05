@@ -1,0 +1,135 @@
+<!-- TopAppBar Component (from Shared Components JSON) -->
+<header class="w-full bg-surface-container-lowest dark:bg-surface border-b border-outline-variant/30 dark:border-outline/20">
+<div class="flex justify-between items-center w-full px-space-md py-space-sm max-w-7xl mx-auto">
+<button id="btn-demo" id="btn-support" id="backBtn" aria-label="Kembali" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low active:scale-95 transition-all duration-150" type="button">
+<span class="material-symbols-outlined text-[22px]">arrow_back</span>
+</button>
+<div class="flex items-center gap-2">
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">Aktivasi Perangkat</span>
+<span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
+</div>
+<button aria-label="Bantuan" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low active:scale-95 transition-all duration-150" type="button">
+<span class="material-symbols-outlined text-[22px]">help_outline</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas (Acoustic Restraint, Balanced Layout) -->
+<main class="flex-1 flex items-center justify-center p-space-md md:p-margin">
+<div class="w-full max-w-xl mx-auto flex flex-col items-center">
+<!-- Hardware Profile / Brand Identity Card -->
+<div class="w-full bg-surface-container-lowest rounded-xl border border-outline-variant/40 custom-shadow p-space-lg md:p-space-xl flex flex-col items-center text-center relative overflow-hidden">
+<!-- Subtle Top Calibrated Line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-80"></div>
+<!-- Mascot Avatar & System Badge -->
+<div class="relative mb-space-md">
+<div class="w-24 h-24 rounded-full ring-2 ring-outline-variant/40 p-1 bg-surface-container-low flex items-center justify-center shadow-inner overflow-hidden">
+<img alt="Maskot Rizoglabs Stodio" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBNAjoe3aW6Z8u58wBBs5bV8748oozprkW_eWcEOu9zejTOoL_wE5OeAhgRocW726lFJNWkW8-O-9cpFotxzBZ2LwLn51_gaPnesc5Q9fZuiHzFoQ7zosB3JhJVoVacBEbG30DP-r8eAuKnRaigXsJw69U4K2MfWmUSvX1inaCmAOSLcu0BhKzOTFA61_sot7sOmZVxxZVkHQgL2tAod7TSahXhAYra0funuBkNESFVHL17Kneut3rzyuT-FceU7F9zw">
+</div>
+<!-- Status icon dot indicator: minimalist pure check -->
+<div class="absolute bottom-0 right-1 w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md ring-2 ring-surface-container-lowest" title="Terminal Resmi">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+</div>
+<!-- Brand Labels -->
+<div class="flex items-center gap-2 mb-space-xs">
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">KASIR TOKO MUSIK</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-container text-on-secondary-container font-label-sm text-label-sm mb-space-lg border border-outline-variant/20">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="">Aktivasi Perangkat</span>
+</div>
+<!-- Instructions -->
+<div class="max-w-md mx-auto mb-space-xl">
+<h1 class="font-headline-md text-headline-md font-semibold text-on-surface mb-2">Aktivasi Perangkat</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Salin Kode Instalasi perangkat ini dan kirimkan ke tim pengembang untuk mendapatkan Kode Aktivasi resmi kasir Anda.</p>
+</div>
+<!-- Activation Code Segmented Input Form -->
+<div class="w-full mb-space-lg rounded-xl border border-outline-variant/40 bg-surface-container-low/50 p-space-md text-left"><div class="flex items-center justify-between mb-space-xs"><label class="font-label-md text-label-md text-on-surface-variant font-medium flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">fingerprint</span><span class="">Kode Instalasi Perangkat</span></label><span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">LANGKAH 1</span></div><p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">Kirim kode instalasi unik ini ke pengembang atau admin untuk menerima kode aktivasi Anda.</p><div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 p-2.5 bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-sm mb-space-sm"><div class="flex-1 flex items-center justify-center sm:justify-start px-2 py-1"><span class="font-data-code-sm text-[16px] font-bold tracking-wider text-on-surface select-all text-center sm:text-left" id="install-code-text">__INSTALLATION_CODE__</span></div><button type="button" class="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-label-md font-label-md transition-all active:scale-95 flex-shrink-0 shadow-sm border border-outline-variant/30"  id="btn-copy-install" title="Salin Kode Instalasi"><span class="material-symbols-outlined text-[16px] text-primary">content_copy</span><span class="">Salin Kode</span></button></div><div class="flex items-center justify-end gap-2"><a href="#" id="sendDeveloperLink" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg text-primary hover:bg-primary/10 text-label-md font-label-md transition-colors"><span class="material-symbols-outlined text-[16px]">send</span><span class="">Kirim ke Pengembang via WhatsApp / Email</span></a></div></div><div class="w-full mb-space-lg rounded-xl border border-outline-variant/40 bg-surface-container-low/50 p-space-md text-left">
+  <!-- Header Row with Clean Icon, Label, Format Pill, and Step Badge -->
+  <div class="flex items-center justify-between mb-space-xs">
+    <div class="flex items-center gap-2">
+      <div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+        <span class="material-symbols-outlined text-[14px]">key</span>
+      </div>
+      <span class="font-label-md text-label-md font-semibold text-on-surface">Kode Aktivasi</span>
+      
+    </div>
+    <span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">LANGKAH 2</span>
+  </div>
+  <p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">Masukkan 18 karakter kode lisensi resmi yang Anda terima dari pengembang.</p>
+
+  <!-- 5-Segment Activation Code Input with Balanced Grid & Separators -->
+  <div class="flex items-center justify-between gap-1 sm:gap-1.5 w-full mb-space-sm">
+    <div class="flex-1 min-w-0">
+      <input class="w-full h-11 text-center bg-surface-container-lowest rounded-lg border border-outline-variant/60 font-data-code-sm text-body-md font-semibold text-on-surface uppercase focus:outline-none active-code-focus transition-all shadow-sm px-1" id="part-1" maxlength="3" placeholder="RUP" type="text" >
+    </div>
+    <span class="text-outline-variant font-bold select-none text-[14px] flex-shrink-0">-</span>
+    <div class="flex-1 min-w-0">
+      <input class="w-full h-11 text-center bg-surface-container-lowest rounded-lg border border-outline-variant/60 font-data-code-sm text-body-md font-semibold text-on-surface uppercase focus:outline-none active-code-focus transition-all shadow-sm px-1" id="part-2" maxlength="3" placeholder="ACT" type="text" >
+    </div>
+    <span class="text-outline-variant font-bold select-none text-[14px] flex-shrink-0">-</span>
+    <div class="flex-1 min-w-0">
+      <input class="w-full h-11 text-center bg-surface-container-lowest rounded-lg border border-outline-variant/60 font-data-code-sm text-body-md font-semibold text-on-surface uppercase focus:outline-none active-code-focus transition-all shadow-sm px-1" id="part-3" maxlength="4" placeholder="6YAI" type="text" >
+    </div>
+    <span class="text-outline-variant font-bold select-none text-[14px] flex-shrink-0">-</span>
+    <div class="flex-1 min-w-0">
+      <input class="w-full h-11 text-center bg-surface-container-lowest rounded-lg border border-outline-variant/60 font-data-code-sm text-body-md font-semibold text-on-surface uppercase focus:outline-none active-code-focus transition-all shadow-sm px-1" id="part-4" maxlength="4" placeholder="ZPVI" type="text" >
+    </div>
+    <span class="text-outline-variant font-bold select-none text-[14px] flex-shrink-0">-</span>
+    <div class="flex-1 min-w-0">
+      <input class="w-full h-11 text-center bg-surface-container-lowest rounded-lg border border-outline-variant/60 font-data-code-sm text-body-md font-semibold text-on-surface uppercase focus:outline-none active-code-focus transition-all shadow-sm px-1" id="part-5" maxlength="4" placeholder="QEMI" type="text" >
+    </div>
+  </div>
+
+  <!-- Quick Action Buttons Grid -->
+  <div class="grid grid-cols-2 gap-2">
+    <button class="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-outline-variant/40 bg-surface-container-lowest hover:bg-surface-container text-on-surface text-label-md font-label-md transition-all active:scale-95 shadow-sm" id="btn-paste" type="button">
+      <span class="material-symbols-outlined text-[16px] text-primary">content_paste</span>
+      <span class="">Tempel dari Papan Klip</span>
+    </button>
+    <button class="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg border border-outline-variant/40 bg-surface-container-lowest hover:bg-surface-container text-on-surface text-label-md font-label-md transition-all active:scale-95 shadow-sm" id="btn-scan" type="button">
+      <span class="material-symbols-outlined text-[16px] text-primary">qr_code_scanner</span>
+      <span class="">Pindai Kode QR Aktivasi</span>
+    </button>
+  </div>
+</div>
+<!-- Security / System Verification Banner -->
+<div class="w-full rounded-lg bg-surface-container-low/60 border border-outline-variant/30 p-space-md mb-space-xl flex items-start gap-3 text-left">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary mt-0.5">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+<div class="flex-1">
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Perangkat ini akan terdaftar sebagai terminal kasir resmi toko musik. Sistem berjalan 100% mandiri di memori lokal setelah aktivasi.
+            </p>
+</div>
+</div>
+<!-- Primary Action Trigger Button -->
+<div class="w-full">
+<button class="w-full h-12 rounded-xl bg-primary hover:bg-primary-container active:scale-[0.98] text-on-primary font-label-lg text-label-lg font-semibold flex items-center justify-center gap-2 shadow-sm transition-all duration-150" id="btn-activate" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">key</span>
+<span class="">Verifikasi &amp; Aktifkan Perangkat</span>
+</button>
+</div>
+<!-- Precision Divider -->
+<div class="w-full border-t border-outline-variant/30 my-space-lg"></div>
+<!-- Secondary Footnotes & Navigation Options -->
+<div class="w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+<button class="text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors inline-flex items-center gap-1" type="button"><span class="material-symbols-outlined text-[16px]">support_agent</span><span class="">Belum punya kode aktivasi? Hubungi Pengembang / Pemilik Toko</span></button>
+<button class="text-primary hover:text-primary-container font-label-md text-label-md font-semibold transition-colors inline-flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">play_circle</span>
+<span class="">Coba Mode Demo</span>
+</button>
+</div>
+</div>
+<!-- Studio Precision Device Info / Optical Balance Footprint -->
+<div class="mt-space-lg text-center flex items-center gap-3 text-on-surface-variant/70 font-data-code-sm text-data-code-sm">
+<span class="">ID TERMINAL: __TERMINAL_ID__</span>
+<span class="">•</span>
+<span class="">STATUS LOKAL: __LOCAL_STATUS__</span>
+<span class="">•</span>
+<span class="">VERSI 2.4.0</span>
+</div>
+</div>
+</main>
+<!-- Interactive Input Handlers (Segment Auto-jump & Formatting) -->
