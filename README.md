@@ -33,3 +33,8 @@ After the first deployment, use the generated GitHub Pages URL as the Supabase A
 ## Build
 
 V1 deployment baseline — 2026-10-05.
+
+
+## Production URL
+
+https://rizoglabs.github.io/rizog-labs-studio/
