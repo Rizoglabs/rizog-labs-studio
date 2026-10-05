@@ -1,47 +1,138 @@
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f8f9ff">
-  <title>Aktivasi Perangkat - KASIR Toko Musik</title>\n  <!-- RizogKey Engine certification UI -->
-  <link rel="stylesheet" href="./style.css?v=20261005-5">
-</head>
-<body>
-  <div class="app-shell">
-    <header class="topbar">
-      <button id="backBtn" class="icon-btn topbar-side" type="button" aria-label="Kembali">
-        <svg class="ui-icon topbar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-      </button>
-      <div class="topbar-title">
-        <div id="topTitle">Aktivasi Perangkat <span class="live-dot" aria-hidden="true"></span></div>
-        <div id="topSubtitle" class="top-subtitle"></div>
-      </div>
-      <button id="helpBtn" class="icon-btn topbar-side" type="button" aria-label="Bantuan Informasi">
-        <svg class="ui-icon topbar-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.75 9a2.35 2.35 0 1 1 4.1 1.58c-.95.99-1.85 1.25-1.85 2.67"/><path d="M12 17h.01"/></svg>
-      </button>
-    </header>
-
-    <main id="screen" class="screen">
-      <!-- Screen is rendered by app.js -->
-    </main>
-  </div>
-
-  <!-- Certification harness is intentionally off-canvas so the Dummy App remains 1:1 with the reference UI. -->
-  <section id="certificationHarness" class="cert-harness" aria-hidden="true">
-    <input id="productCode" value="RUPKAS" tabindex="-1">
-    <input id="installationCode" readonly tabindex="-1">
-    <input id="publicKey" readonly tabindex="-1">
-    <input id="activationCode" tabindex="-1">
-    <button id="initBtn" type="button">Initialize Engine</button>
-    <button id="activateBtn" type="button">Activate License</button>
-    <button id="revalidateBtn" type="button">Revalidate</button>
-    <button id="clearBtn" type="button">Clear Local State</button>
-    <span id="statusBadge">UNACTIVATED</span>
-    <pre id="licenseState"></pre>
-    <pre id="log"></pre>
-  </section>
-
-  <script type="module" src="./app.js?v=20261005-5"></script>
-</body>
-</html>
+<!doctype html><html lang="id"><head><meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Aktivasi Perangkat - Kasir Toko Musik</title>
+<!-- Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-surface-variant": "#3d4947",
+            "on-error": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "outline-variant": "#bcc9c6",
+            "inverse-primary": "#6bd8cb",
+            "on-primary-fixed-variant": "#005049",
+            "on-secondary-container": "#5c647a",
+            "on-secondary-fixed-variant": "#3f465c",
+            "outline": "#6d7a77",
+            "primary-container": "#008378",
+            "secondary-fixed-dim": "#bec6e0",
+            "surface-container-lowest": "#ffffff",
+            "surface-variant": "#d3e4fe",
+            "on-secondary": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "inverse-surface": "#213145",
+            "on-primary-fixed": "#00201d",
+            "secondary-fixed": "#dae2fd",
+            "on-tertiary-fixed": "#002114",
+            "secondary": "#565e74",
+            "on-background": "#0b1c30",
+            "surface-dim": "#cbdbf5",
+            "primary-fixed-dim": "#6bd8cb",
+            "surface-container": "#e5eeff",
+            "on-surface": "#0b1c30",
+            "tertiary-fixed-dim": "#68dba9",
+            "surface": "#f8f9ff",
+            "on-primary": "#ffffff",
+            "on-primary-container": "#f4fffc",
+            "tertiary-container": "#00855d",
+            "secondary-container": "#dae2fd",
+            "tertiary": "#006948",
+            "error-container": "#ffdad6",
+            "error": "#ba1a1a",
+            "on-error-container": "#93000a",
+            "tertiary-fixed": "#85f8c4",
+            "on-secondary-fixed": "#131b2e",
+            "primary": "#00685f",
+            "primary-fixed": "#89f5e7",
+            "surface-tint": "#006a61",
+            "on-tertiary-container": "#f5fff7",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-fixed-variant": "#005137",
+            "inverse-on-surface": "#eaf1ff",
+            "surface-container-low": "#eff4ff",
+            "surface-container-highest": "#d3e4fe",
+            "background": "#f8f9ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-mobile": "0.75rem",
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem",
+            "margin": "1.75rem",
+            "gutter": "1.25rem",
+            "space-lg": "1.5rem",
+            "space-md": "1rem",
+            "space-xl": "2.25rem",
+            "margin-mobile": "1rem"
+          },
+          "fontFamily": {
+            "data-code-sm": ["JetBrains Mono"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "headline-xl": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "headline-xl-mobile": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "data-currency-md": ["JetBrains Mono"],
+            "data-currency-lg": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "data-code-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-xl-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+            "data-currency-md": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "data-currency-lg": ["28px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .custom-shadow {
+      box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
+    }
+    .active-code-focus:focus-within {
+      border-color: #00685f;
+      box-shadow: 0 0 0 3px rgba(0, 104, 95, 0.12);
+    }
+  </style><link rel="stylesheet" href="./style.css?v=20261005-6"></head><body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col font-body-md select-none"><div id="dummy-app-root"></div><script type="module" src="./app.js?v=20261005-6"></script></body></html>
