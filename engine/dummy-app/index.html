@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RizogKey Engine — Dummy App</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">RIZOG LABS · INTERNAL</p>
+      <h1>RizogKey Engine</h1>
+      <p class="subtitle">Dummy App untuk certification dan regression testing.</p>
+      <span id="statusBadge" class="badge badge-muted">BELUM DIINISIALISASI</span>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Installation</h2>
+        <label>Product Code<input id="productCode" value="RUPKAS"></label>
+        <label>Installation Code<input id="installationCode" readonly></label>
+        <label>Public Key<input id="publicKey" readonly></label>
+        <button id="initBtn">Initialize Engine</button>
+      </article>
+
+      <article class="card">
+        <h2>Activation</h2>
+        <label>Activation Code<input id="activationCode" placeholder="RPK-ACT-XXXX-XXXX-XXXX"></label>
+        <button id="activateBtn">Activate License</button>
+      </article>
+
+      <article class="card">
+        <h2>License State</h2>
+        <pre id="licenseState">Belum ada license grant.</pre>
+        <div class="actions">
+          <button id="revalidateBtn">Revalidate</button>
+          <button id="clearBtn" class="danger">Clear Local State</button>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Test Log</h2>
+        <pre id="log"></pre>
+      </article>
+    </section>
+
+    <footer>Engine target: RizogKey Protocol V1 · Dummy App only</footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
