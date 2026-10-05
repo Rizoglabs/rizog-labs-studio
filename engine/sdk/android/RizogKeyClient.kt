@@ -154,7 +154,7 @@ class RizogKeyClient(
 
         val verifier = Signature.getInstance("Ed25519")
         verifier.initVerify(publicKey)
-        verifier.update(grant.toString().toByteArray(StandardCharsets.UTF_8))
+        verifier.update(canonicalize(grant).toByteArray(StandardCharsets.UTF_8))
         if (!verifier.verify(Base64.decode(signatureB64, Base64.DEFAULT))) {
             error("RK_GRANT_INVALID")
         }
@@ -166,6 +166,24 @@ class RizogKeyClient(
             .apply()
 
         return grant
+    }
+
+    private fun canonicalize(value: Any?): String {
+        return when (value) {
+            is JSONObject -> {
+                value.keys().asSequence().toList().sorted().joinToString(prefix = "{", postfix = "}") { key ->
+                    JSONObject.quote(key) + ":" + canonicalize(value.get(key))
+                }
+            }
+            is org.json.JSONArray -> {
+                (0 until value.length()).joinToString(prefix = "[", postfix = "]") { index ->
+                    canonicalize(value.get(index))
+                }
+            }
+            JSONObject.NULL -> "null"
+            is String, is Number, is Boolean -> JSONObject.valueToString(value)
+            else -> JSONObject.valueToString(value)
+        }
     }
 
     private fun request(body: JSONObject): JSONObject {
