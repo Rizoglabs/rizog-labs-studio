@@ -18,6 +18,14 @@ function installationCode() {
   return `RPK-INST-${value.slice(0,5)}-${value.slice(5)}`;
 }
 function isoNow() { return new Date().toISOString(); }
+function canonicalize(value) {
+  if (Array.isArray(value)) return "[" + value.map((item) => canonicalize(item)).join(",") + "]";
+  if (value && typeof value === "object") {
+    const record = value;
+    return "{" + Object.keys(record).sort().map((key) => JSON.stringify(key) + ":" + canonicalize(record[key])).join(",") + "}";
+  }
+  return JSON.stringify(value);
+}
 function past(value) { return Boolean(value && Date.now() >= Date.parse(value)); }
 
 function openDb(name) {
@@ -153,7 +161,7 @@ export class RizogKeyClient {
       { name: "Ed25519" },
       signingKey,
       fromBase64(signature),
-      new TextEncoder().encode(JSON.stringify(grant)),
+      new TextEncoder().encode(canonicalize(grant)),
     );
     if (!valid) throw new Error("RK_GRANT_INVALID");
 
