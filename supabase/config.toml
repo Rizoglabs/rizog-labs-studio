@@ -1,0 +1,4 @@
+project_id = "nddipymcyeargsdbulyo"
+
+[functions.rizogkey-admin]
+verify_jwt = true

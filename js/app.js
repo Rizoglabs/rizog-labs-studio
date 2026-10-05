@@ -14,6 +14,8 @@ const loginError = document.getElementById('login-error');
 let generatedActivationCode = '';
 let toastTimer = null;
 let historyRecords = [];
+let productRecords = [];
+let editingProductCode = null;
 
 function durationLabel(code) {
   return ({ '1M': '1 Bulan', '6M': '6 Bulan', '1Y': '1 Tahun', 'LIFETIME': 'Selamanya' })[code] || '-';
@@ -31,7 +33,7 @@ function generateTestInstallationCode() {
   const part = len => { const bytes = new Uint8Array(len); crypto.getRandomValues(bytes); let out = ''; for (let i = 0; i < len; i++) out += chars[bytes[i] % chars.length]; return out; };
   inputInstall.value = `TEST-RPK-${part(4)}-${part(4)}-${part(4)}`; checkFormValidity(); showToast('Test Installation Code dibuat.');
 }
-function checkFormValidity() { const valid = inputCustomer.value.trim() !== '' && normalizeInstallation(inputInstall.value) !== ''; btnSubmit.toggleAttribute('disabled', !valid); }
+function checkFormValidity() { const valid = inputCustomer.value.trim() !== '' && normalizeInstallation(inputInstall.value) !== '' && document.getElementById('input-product').value !== ''; btnSubmit.toggleAttribute('disabled', !valid); }
 async function invokeRizogKey(body) {
   const { data, error } = await sb.functions.invoke('rizogkey-admin', { body });
   if (error) {
@@ -74,7 +76,23 @@ sb.auth.onAuthStateChange((event, session) => {
     } catch (error) { console.error('Auth state handling failed.', error); showToast('Gagal memperbarui session.', true); }
   });
 });
-async function refreshData() { await Promise.all([refreshHistory(), refreshDashboardCounts()]); }
+async function refreshData() { await Promise.all([refreshHistory(), refreshDashboardCounts(), refreshProducts()]); }
+async function refreshProducts() {
+  const response = await invokeRizogKey({ action: 'product_list' });
+  productRecords = response.data || [];
+  renderProducts();
+  populateProductSelector();
+}
+function populateProductSelector() {
+  const select = document.getElementById('input-product');
+  const previous = select.value;
+  select.replaceChildren(new Option('Select active product', ''));
+  productRecords.filter(product => product.status === 'ACTIVE').forEach(product => {
+    select.add(new Option(`${product.display_name || product.name} — ${product.product_code}`, product.product_code));
+  });
+  select.value = productRecords.some(p => p.product_code === previous && p.status === 'ACTIVE') ? previous : '';
+  checkFormValidity();
+}
 async function refreshHistory() {
   const response = await invokeRizogKey({ action: 'list' });
   historyRecords = (response.data || []).map(row => ({
@@ -102,7 +120,7 @@ document.getElementById('activation-form').addEventListener('submit', async even
   const installation = normalizeInstallation(inputInstall.value);
   const duration = document.getElementById('input-duration').value;
   const product = document.getElementById('input-product').value;
-  if (!customer || !installation) return;
+  if (!customer || !installation || !product) return;
   btnSubmit.disabled = true; btnText.textContent = 'GENERATING...';
   try {
     const response = await invokeRizogKey({ action: 'generate', product_code: product, customer_name: customer, installation_code: installation, duration_code: duration, device_limit: 1 });
@@ -173,27 +191,111 @@ function showToast(message, error = false) {
 function openSidebar() { document.getElementById('app-sidebar').classList.add('is-open'); document.getElementById('sidebar-overlay').classList.add('is-open'); document.body.classList.add('overflow-hidden'); }
 function closeSidebar() { document.getElementById('app-sidebar').classList.remove('is-open'); document.getElementById('sidebar-overlay').classList.remove('is-open'); document.body.classList.remove('overflow-hidden'); }
 window.addEventListener('resize', () => { if (window.innerWidth >= 1024) closeSidebar(); });
+
+function productStatusBadge(status) {
+  const style = status === 'ACTIVE' ? 'bg-teal-100 text-teal-700' : status === 'ARCHIVED' ? 'bg-gray-200 text-gray-700' : 'bg-yellow-100 text-yellow-800';
+  return `<span class="inline-flex px-2.5 py-1 rounded-full text-[11px] font-bold uppercase ${style}">${escapeHtml(status || '-')}</span>`;
+}
+function renderProducts() {
+  const body = document.getElementById('products-body');
+  const query = document.getElementById('product-search').value.trim().toLowerCase();
+  const status = document.getElementById('product-status-filter').value;
+  const rows = productRecords.filter(p => (!query || `${p.name} ${p.display_name} ${p.product_code}`.toLowerCase().includes(query)) && (status === 'ALL' || p.status === status));
+  if (!rows.length) { body.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-gray-400">${productRecords.length ? 'No products match these filters.' : 'No products registered yet.'}</td></tr>`; return; }
+  body.innerHTML = rows.map(p => `
+    <tr class="border-b border-gray-100 hover:bg-gray-50">
+      <td class="px-6 py-4"><div class="font-semibold">${escapeHtml(p.display_name || p.name)}</div><div class="text-xs text-gray-500 mt-1">${escapeHtml(p.brand || 'RizogLabs')}</div></td>
+      <td class="px-6 py-4 font-mono text-xs">${escapeHtml(p.product_code)}</td><td class="px-6 py-4">${escapeHtml(p.platform || 'UNKNOWN')}</td>
+      <td class="px-6 py-4">${escapeHtml(p.current_version || '—')}</td><td class="px-6 py-4">${productStatusBadge(p.status)}</td>
+      <td class="px-6 py-4 text-right whitespace-nowrap"><button type="button" data-product-view="${escapeHtml(p.product_code)}" class="text-teal-700 hover:text-teal-900 font-semibold text-xs mr-3">DETAILS</button><button type="button" data-action="edit-product" data-product-code="${escapeHtml(p.product_code)}" class="text-gray-500 hover:text-gray-900 font-semibold text-xs">EDIT</button></td>
+    </tr>`).join('');
+}
+function showProductList() { document.getElementById('product-list-panel').classList.remove('hidden'); document.getElementById('product-detail-panel').classList.add('hidden'); }
+async function openProductDetail(productCode) {
+  try {
+    const { data: p } = await invokeRizogKey({ action: 'product_detail', product_code: productCode });
+    document.getElementById('header-title').textContent = p.display_name || p.name;
+    document.getElementById('product-list-panel').classList.add('hidden'); document.getElementById('product-detail-panel').classList.remove('hidden');
+    const fields = [['Product Name',p.name],['Display Name',p.display_name],['Brand',p.brand],['Product Code',p.product_code],['Platform',p.platform],['Status',p.status],['Current Version',p.current_version],['RizogKey Engine',p.rizogkey_engine_version],['Protocol',p.rizogkey_protocol_version],['Created',p.created_at ? new Date(p.created_at).toLocaleString() : '—'],['Updated',p.updated_at ? new Date(p.updated_at).toLocaleString() : '—']];
+    document.getElementById('product-detail-content').innerHTML = `<div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-8">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"><div><p class="text-xs uppercase tracking-wider text-gray-500 font-bold">Product Information</p><h3 class="text-2xl font-black mt-2">${escapeHtml(p.display_name || p.name)}</h3><p class="font-mono text-sm text-gray-500 mt-1">${escapeHtml(p.product_code)}</p></div>${productStatusBadge(p.status)}</div>
+      <dl class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">${fields.map(([label,value]) => `<div><dt class="text-xs uppercase tracking-wide text-gray-500 font-bold">${escapeHtml(label)}</dt><dd class="font-semibold mt-1 break-words">${escapeHtml(value || '—')}</dd></div>`).join('')}</dl>
+      <div class="mt-8 grid sm:grid-cols-2 gap-4"><div class="rounded-xl bg-gray-50 border border-gray-100 p-5"><p class="text-sm text-gray-500">Installations</p><p class="text-3xl font-black mt-1">${Number(p.installation_count) || 0}</p></div><div class="rounded-xl bg-gray-50 border border-gray-100 p-5"><p class="text-sm text-gray-500">Licenses</p><p class="text-3xl font-black mt-1">${Number(p.license_count) || 0}</p></div></div>
+      ${p.description ? `<div class="mt-6"><p class="text-xs uppercase tracking-wide text-gray-500 font-bold">Description</p><p class="mt-2 text-sm whitespace-pre-wrap">${escapeHtml(p.description)}</p></div>` : ''}
+      <p class="mt-6 text-xs text-gray-400">Installation and license records remain in RizogKey; this page displays their totals.</p></div>`;
+  } catch (error) { console.error(error); showToast(error?.message || 'Gagal memuat product.', true); }
+}
+function openProductForm(p = null) {
+  editingProductCode = p?.product_code || null;
+  document.getElementById('product-form').reset();
+  document.getElementById('product-modal-title').textContent = p ? 'Edit Product' : 'Add Product';
+  document.getElementById('product-save-button').textContent = p ? 'Save Changes' : 'Create Product';
+  document.getElementById('product-code').disabled = Boolean(p);
+  document.getElementById('product-code').value = p?.product_code || '';
+  document.getElementById('product-name').value = p?.name || '';
+  document.getElementById('product-display-name').value = p?.display_name || '';
+  document.getElementById('product-brand').value = p?.brand || 'RizogLabs';
+  document.getElementById('product-platform').value = p?.platform || 'UNKNOWN';
+  document.getElementById('product-status').value = p?.status || 'INACTIVE';
+  document.getElementById('product-version').value = p?.current_version || '';
+  document.getElementById('product-engine-version').value = p?.rizogkey_engine_version || '';
+  document.getElementById('product-protocol-version').value = p?.rizogkey_protocol_version || '';
+  document.getElementById('product-description').value = p?.description || '';
+  document.getElementById('product-form-error').classList.add('hidden'); document.getElementById('product-modal').classList.remove('hidden'); document.getElementById('product-code').focus();
+}
+function closeProductForm() { document.getElementById('product-modal').classList.add('hidden'); }
+async function saveProduct(event) {
+  event.preventDefault();
+  const isEditing = Boolean(editingProductCode);
+  const errorBox = document.getElementById('product-form-error');
+  const button = document.getElementById('product-save-button');
+  const values = {
+    product_code: editingProductCode || document.getElementById('product-code').value.trim().toUpperCase(),
+    name: document.getElementById('product-name').value.trim(),
+    display_name: document.getElementById('product-display-name').value.trim(),
+    brand: document.getElementById('product-brand').value.trim(),
+    platform: document.getElementById('product-platform').value,
+    status: document.getElementById('product-status').value,
+    current_version: document.getElementById('product-version').value.trim(),
+    rizogkey_engine_version: document.getElementById('product-engine-version').value.trim(),
+    rizogkey_protocol_version: document.getElementById('product-protocol-version').value.trim(),
+    description: document.getElementById('product-description').value.trim()
+  };
+  button.disabled = true; button.textContent = 'Saving...'; errorBox.classList.add('hidden');
+  try {
+    await invokeRizogKey({ action: isEditing ? 'product_update' : 'product_create', ...values });
+    closeProductForm(); editingProductCode = null; await refreshProducts(); showToast(isEditing ? 'Product updated.' : 'Product created.');
+  } catch (error) {
+    console.error(error); errorBox.textContent = error?.message === 'PRODUCT_CODE_EXISTS' ? 'Product Code tersebut sudah digunakan.' : error?.message || 'Product gagal disimpan.'; errorBox.classList.remove('hidden');
+  } finally { button.disabled = false; button.textContent = isEditing ? 'Save Changes' : 'Create Product'; }
+}
+
 function switchTab(tabName) {
-  closeSidebar(); const titles = { dashboard:'Overview', generator:'Generate New Activation', history:'Activation History' }; document.getElementById('header-title').textContent = titles[tabName];
-  ['dashboard','generator','history'].forEach(view => {
+  closeSidebar(); const titles = { dashboard:'Overview', products:'Products', generator:'Generate New Activation', history:'Activation History' }; document.getElementById('header-title').textContent = titles[tabName] || 'Product Detail';
+  ['dashboard','products','generator','history'].forEach(view => {
     const element = document.getElementById(`view-${view}`); element.classList.toggle('hidden', view !== tabName); element.classList.toggle('block', view === tabName);
     const navBtn = document.getElementById(`nav-${view}`);
     navBtn.className = view === tabName ? 'w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-colors bg-teal-50 text-teal-700' : 'w-full flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-colors text-gray-500 hover:bg-gray-50 hover:text-gray-900';
   });
-  if (tabName === 'dashboard') renderDashboard(); if (tabName === 'history') renderHistory();
+  if (tabName === 'dashboard') renderDashboard(); if (tabName === 'history') renderHistory(); if (tabName === 'products') showProductList();
 }
+document.getElementById('input-product').addEventListener('change', checkFormValidity);
 inputCustomer.addEventListener('input', checkFormValidity);
 inputInstall.addEventListener('input', () => { inputInstall.value = normalizeInstallation(inputInstall.value); checkFormValidity(); });
 document.getElementById('history-search').addEventListener('input', renderHistory);
 document.getElementById('history-status').addEventListener('change', renderHistory);
+document.getElementById('product-search').addEventListener('input', renderProducts);
+document.getElementById('product-status-filter').addEventListener('change', renderProducts);
+document.getElementById('product-form').addEventListener('submit', saveProduct);
 document.addEventListener('click', event => {
   const tab = event.target.closest('[data-tab]'); if (tab) { switchTab(tab.dataset.tab); return; }
   const action = event.target.closest('[data-action]');
   if (action) {
     const name = action.dataset.action;
-    if (name === 'open-sidebar') openSidebar(); else if (name === 'close-sidebar') closeSidebar(); else if (name === 'sign-out') signOut(); else if (name === 'generate-test-code') generateTestInstallationCode(); else if (name === 'copy-code') copyCode();
+    if (name === 'open-sidebar') openSidebar(); else if (name === 'close-sidebar') closeSidebar(); else if (name === 'sign-out') signOut(); else if (name === 'generate-test-code') generateTestInstallationCode(); else if (name === 'copy-code') copyCode(); else if (name === 'add-product') openProductForm(); else if (name === 'close-product-modal') closeProductForm(); else if (name === 'back-to-products') switchTab('products'); else if (name === 'edit-product') { const product = productRecords.find(item => item.product_code === action.dataset.productCode); if (product) openProductForm(product); }
     return;
   }
+  const productView = event.target.closest('[data-product-view]'); if (productView) openProductDetail(productView.dataset.productView);
   const revoke = event.target.closest('[data-revoke-id]'); if (revoke) revokeRecord(revoke.dataset.revokeId);
 });
 (async function init() {
