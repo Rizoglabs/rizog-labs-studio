@@ -1,29 +1,28 @@
 const API = "https://nddipymcyeargsdbulyo.supabase.co/functions/v1/rizogkey-client";
 const DB = "rizogkey-dummy";
 const STORE = "state";
+const CLIENT_VERSION = "dummy-1.0.0";
+const DEFAULT_TRUSTED_SIGNING_KEYS = {
+  1: "UnS601AB8gu4rxNrwcuz+m9WIOt7+43Pa2c3uLPWD8k=",
+};
 
 function b64(buf) {
   let s = "";
   const a = new Uint8Array(buf);
-  for (let i = 0; i < a.length; i += 0x8000) {
-    s += String.fromCharCode(...a.slice(i, i + 0x8000));
-  }
+  for (let i = 0; i < a.length; i += 0x8000) s += String.fromCharCode(...a.slice(i, i + 0x8000));
   return btoa(s);
 }
-
 function u8(s) {
   const b = atob(s);
   return Uint8Array.from(b, (c) => c.charCodeAt(0));
 }
-
 function code() {
-  const a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const b = crypto.getRandomValues(new Uint8Array(10));
-  let s = "";
-  for (const x of b) s += a[x % a.length];
-  return "RPK-INST-" + s.slice(0, 5) + "-" + s.slice(5);
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(10));
+  let out = "";
+  for (const x of bytes) out += alphabet[x % alphabet.length];
+  return "RPK-INST-" + out.slice(0, 5) + "-" + out.slice(5);
 }
-
 function openDb() {
   return new Promise((resolve, reject) => {
     const r = indexedDB.open(DB, 1);
@@ -32,7 +31,6 @@ function openDb() {
     r.onerror = () => reject(r.error);
   });
 }
-
 async function get(key) {
   const d = await openDb();
   return new Promise((resolve, reject) => {
@@ -43,7 +41,6 @@ async function get(key) {
     t.oncomplete = () => d.close();
   });
 }
-
 async function put(key, value) {
   const d = await openDb();
   return new Promise((resolve, reject) => {
@@ -56,7 +53,6 @@ async function put(key, value) {
     t.onerror = () => reject(t.error);
   });
 }
-
 async function del(key) {
   const d = await openDb();
   return new Promise((resolve, reject) => {
@@ -69,38 +65,29 @@ async function del(key) {
     t.onerror = () => reject(t.error);
   });
 }
-
-function now() {
-  return new Date().toISOString();
-}
-
-function isPast(value) {
-  return Boolean(value && Date.now() >= Date.parse(value));
-}
+const now = () => new Date().toISOString();
+const isPast = (value) => Boolean(value && Date.now() >= Date.parse(value));
 
 export class RizogKeyDummyClient {
-  constructor(product = "RUPKAS") {
-    this.product = product;
+  constructor(product = "RUPKAS", options = {}) {
+    this.product = String(product).trim().toUpperCase();
+    this.trustedSigningKeys = options.trustedSigningKeys || DEFAULT_TRUSTED_SIGNING_KEYS;
     this.state = null;
     this.identity = null;
   }
 
   async initialize() {
     this.state = (await get("state")) || null;
-
     let identity = await get("identity");
 
     if (!identity) {
-      if (!globalThis.crypto?.subtle) {
-        throw new Error("RK_WEB_CRYPTO_UNAVAILABLE");
-      }
+      if (!globalThis.crypto?.subtle) throw new Error("RK_WEB_CRYPTO_UNAVAILABLE");
 
       const keyPair = await crypto.subtle.generateKey(
         { name: "Ed25519" },
         false,
         ["sign", "verify"],
       );
-
       const publicKey = await crypto.subtle.exportKey("raw", keyPair.publicKey);
 
       identity = {
@@ -109,7 +96,6 @@ export class RizogKeyDummyClient {
         publicKey: b64(publicKey),
         createdAt: now(),
       };
-
       await put("identity", identity);
     }
 
@@ -129,14 +115,12 @@ export class RizogKeyDummyClient {
 
   status() {
     const grant = this.state?.grant;
-
     if (!grant) return "UNACTIVATED";
     if (grant.status !== "ACTIVE") return grant.status || "UNKNOWN";
+    if (grant.product_code !== this.product) return "RK_PRODUCT_MISMATCH";
+    if (grant.installation_id !== this.state?.installation_id && this.state?.installation_id) return "RK_INSTALLATION_MISMATCH";
     if (grant.expires_at && isPast(grant.expires_at)) return "EXPIRED";
-    if (grant.offline_until && isPast(grant.offline_until)) {
-      return "REVALIDATION_REQUIRED";
-    }
-
+    if (grant.offline_until && isPast(grant.offline_until)) return "REVALIDATION_REQUIRED";
     return "ACTIVE";
   }
 
@@ -145,59 +129,85 @@ export class RizogKeyDummyClient {
   }
 
   async request(body) {
-    const response = await fetch(API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(body),
-    });
+    if (!globalThis.fetch) throw new Error("RK_NETWORK_UNAVAILABLE");
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
 
-    const payload = await response.json();
-    if (!response.ok) {
-      throw new Error(payload.error || "RK_SERVER_ERROR");
+    try {
+      const response = await fetch(API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch {
+        payload = {};
+      }
+
+      if (!response.ok) {
+        throw new Error(payload?.error || "RK_SERVER_ERROR");
+      }
+      return payload.data;
+    } catch (error) {
+      if (error?.name === "AbortError" || error instanceof TypeError) {
+        throw new Error("RK_NETWORK_UNAVAILABLE");
+      }
+      throw error;
+    } finally {
+      clearTimeout(timer);
     }
-
-    return payload.data;
   }
 
   async accept(data) {
-    if (
-      !data?.license_grant ||
-      !data?.signature ||
-      !data?.signing?.public_key
-    ) {
+    const grant = data?.license_grant;
+    const signature = data?.signature;
+    const keyVersion = Number(data?.signing?.key_version || 0);
+    const publicKey = String(data?.signing?.public_key || "");
+
+    if (!grant || !signature || !keyVersion || !publicKey) {
       throw new Error("RK_SIGNED_GRANT_REQUIRED");
     }
-
     if (!crypto?.subtle) throw new Error("RK_WEB_CRYPTO_UNAVAILABLE");
+
+    const trustedPublicKey = this.trustedSigningKeys[keyVersion];
+    if (!trustedPublicKey || trustedPublicKey !== publicKey) {
+      throw new Error("RK_SIGNING_KEY_UNTRUSTED");
+    }
+    if (grant.product_code !== this.product) throw new Error("RK_PRODUCT_MISMATCH");
+    if (grant.installation_id !== this.identity?.installationId && this.identity?.installationId) {
+      throw new Error("RK_INSTALLATION_MISMATCH");
+    }
 
     const signingKey = await crypto.subtle.importKey(
       "raw",
-      u8(data.signing.public_key),
+      u8(publicKey),
       { name: "Ed25519" },
       false,
       ["verify"],
     );
-
     const valid = await crypto.subtle.verify(
       { name: "Ed25519" },
       signingKey,
-      u8(data.signature),
-      new TextEncoder().encode(JSON.stringify(data.license_grant)),
+      u8(signature),
+      new TextEncoder().encode(JSON.stringify(grant)),
     );
-
     if (!valid) throw new Error("RK_GRANT_INVALID");
 
     this.state = {
-      grant: data.license_grant,
-      signature: data.signature,
-      signingPublicKey: data.signing.public_key,
-      signingKeyVersion: data.signing.key_version,
+      grant,
+      signature,
+      signingPublicKey: publicKey,
+      signingKeyVersion: keyVersion,
+      installation_id: grant.installation_id,
       updatedAt: now(),
     };
-
     await put("state", this.state);
   }
 
@@ -211,7 +221,7 @@ export class RizogKeyDummyClient {
       activation_code: String(activationCode || "").trim().toUpperCase(),
       platform: "web",
       public_key: this.publicKey(),
-      client_version: "dummy-1.0.0",
+      client_version: CLIENT_VERSION,
     });
 
     await this.accept(data);
@@ -228,7 +238,7 @@ export class RizogKeyDummyClient {
       license_id: grant.license_id,
       installation_id: grant.installation_id,
       public_key: this.publicKey(),
-      client_version: "dummy-1.0.0",
+      client_version: CLIENT_VERSION,
     });
 
     await this.accept(data);
@@ -240,5 +250,17 @@ export class RizogKeyDummyClient {
     await del("identity");
     this.state = null;
     this.identity = null;
+  }
+
+  async setTestState(grant, signature = "TEST", signingPublicKey = Object.values(this.trustedSigningKeys)[0]) {
+    this.state = {
+      grant,
+      signature,
+      signingPublicKey,
+      signingKeyVersion: Number(Object.keys(this.trustedSigningKeys)[0]),
+      installation_id: grant?.installation_id || null,
+      updatedAt: now(),
+    };
+    await put("state", this.state);
   }
 }
