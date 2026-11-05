@@ -42,6 +42,19 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build LibreDWG CAD Docker image
         run: docker build --pull -f RizogCAD/Dockerfile -t rizogcad:test RizogCAD
+      - name: Export libreDWG binary for reproducible CAD tests
+        run: |
+          mkdir -p RizogCAD/artifacts
+          docker create --name extract-cad rizogcad:test
+          docker cp extract-cad:/usr/local/bin/dwg2dxf RizogCAD/artifacts/dwg2dxf
+          docker rm extract-cad
+          chmod +x RizogCAD/artifacts/dwg2dxf
+      - name: Upload DWG engine test binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: rizogcad-dwg2dxf-linux-amd64
+          path: RizogCAD/artifacts/dwg2dxf
+          retention-days: 3
       - name: Verify LibreDWG and server health
         run: |
           docker run --rm --entrypoint dwg2dxf rizogcad:test --version
