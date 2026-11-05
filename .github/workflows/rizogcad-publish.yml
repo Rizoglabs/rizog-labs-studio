@@ -1,0 +1,48 @@
+name: RizogCAD — Publish free-hosting Docker image
+
+on:
+  push:
+    branches: [rizogcad-converter]
+    paths:
+      - "RizogCAD/**"
+      - ".github/workflows/rizogcad-publish.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: rizogcad-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish linux/amd64 image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./RizogCAD
+          file: ./RizogCAD/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/rizoglabs/rizogcad:latest
+            ghcr.io/rizoglabs/rizogcad:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/Rizoglabs/rizog-labs-studio
+            org.opencontainers.image.title=RizogCAD
+            org.opencontainers.image.description=Web DWG/DXF to PDF converter
+          cache-from: type=gha,scope=rizogcad
+          cache-to: type=gha,scope=rizogcad,mode=max
