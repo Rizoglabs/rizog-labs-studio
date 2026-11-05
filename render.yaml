@@ -1,0 +1,17 @@
+# RizogCAD web service (Render Blueprint).
+# Keamanan: kode akses diisi di Dashboard, tidak disimpan di GitHub.
+services:
+  - type: web
+    name: rizogcad
+    runtime: docker
+    plan: free
+    region: singapore
+    repo: https://github.com/Rizoglabs/rizog-labs-studio
+    branch: rizogcad-converter
+    dockerfilePath: ./RizogCAD/Dockerfile
+    dockerContext: ./RizogCAD
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: RIZOGCAD_ACCESS_KEY
+        sync: false
