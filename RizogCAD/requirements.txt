@@ -2,3 +2,4 @@ fastapi>=0.110,<1
 uvicorn>=0.30,<1
 pymupdf>=1.24,<2
 ezdxf>=1.3,<2
+Pillow>=11,<13
