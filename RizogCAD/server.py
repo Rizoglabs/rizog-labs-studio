@@ -5,6 +5,7 @@ CAD rendering is best effort; verify every sheet before technical use.
 """
 from __future__ import annotations
 
+import hmac
 import json
 import os
 from pathlib import Path
@@ -17,7 +18,7 @@ from urllib.parse import quote
 
 import ezdxf
 import fitz
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query, Request, Depends
 from fastapi.responses import HTMLResponse, Response
 from ezdxf.addons.drawing import Frontend, RenderContext, config as dconfig, layout as dlayout, pymupdf
 
@@ -41,8 +42,8 @@ def cad_engine() -> tuple[str | None, str | None]:
     exe = shutil.which("ODAFileConverter") or shutil.which("TeighaFileConverter")
     if exe:
         return "ODA", exe
-    dwg = shutil.which("dwg2dxf")
-    if dwg:
+    dwg = os.environ.get("LIBREDWG_BINARY") or shutil.which("dwg2dxf")
+    if dwg and (Path(dwg).is_file() or shutil.which(dwg)):
         return "LibreDWG", dwg
     return None, None
 
@@ -57,12 +58,21 @@ async def health():
     kind, _ = cad_engine()
     return {
         "ready": True,
+        "auth_required": bool(os.environ.get("RIZOGCAD_ACCESS_KEY")),
         "dwg_ready": kind is not None,
         "dxf_ready": True,
         "engine": kind or "DXF only",
         "reason": "DWG memerlukan ODA File Converter atau dwg2dxf di server." if not kind else "",
     }
 
+
+def require_access(req: Request) -> None:
+    """Optional shared access code for privately deployed converters."""
+    expected = os.environ.get("RIZOGCAD_ACCESS_KEY", "")
+    if expected:
+        actual = req.headers.get("X-Access-Key", "")
+        if not actual or not hmac.compare_digest(actual, expected):
+            raise HTTPException(401, "Kode akses tidak valid. Masukkan kode akses RizogCAD.")
 
 def safe_filename(raw: str) -> str:
     name = raw.replace("\\", "/").split("/")[-1].strip()
@@ -199,7 +209,7 @@ def pdf_page(doc: ezdxf.document.Drawing, space, paper: str, orientation: str, t
 
 
 @app.post("/api/inspect")
-async def inspect(req: Request, filename: str = Query(..., min_length=1, max_length=240)):
+async def inspect(req: Request, filename: str = Query(..., min_length=1, max_length=240), _auth: None = Depends(require_access)):
     with tempfile.TemporaryDirectory(prefix="rizogcad_") as temp:
         root = Path(temp)
         src = await save_body(req, root, filename)
@@ -219,6 +229,7 @@ async def convert(
     content: str = "layouts",
     include_model: int = 0,
     layouts: str = "[]",
+    _auth: None = Depends(require_access),
 ):
     if paper != "source" and paper not in SIZES:
         raise HTTPException(400, "Ukuran kertas tidak dikenal.")
