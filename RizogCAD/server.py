@@ -205,7 +205,10 @@ def pdf_page(doc: ezdxf.document.Drawing, space, paper: str, orientation: str, t
     policy = dconfig.ColorPolicy.BLACK if theme == "mono" else dconfig.ColorPolicy.COLOR
     opts = dconfig.Configuration(background_policy=dconfig.BackgroundPolicy.WHITE, color_policy=policy)
     Frontend(RenderContext(doc), backend, config=opts).draw_layout(space)
-    return backend.get_pdf_bytes(page)
+    # Preserve original paper coordinates and viewport placement at source size.
+    # Fitting content to page distorts scale and can expand a small viewport to a full sheet.
+    keep_original_scale = paper == "source" and space.name.lower() != "model"
+    return backend.get_pdf_bytes(page, settings=dlayout.Settings(fit_page=not keep_original_scale, scale=1.0))
 
 
 @app.post("/api/inspect")
