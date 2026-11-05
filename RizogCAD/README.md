@@ -68,3 +68,18 @@ python smoke_test.py
 PDF contoh 3 layout hanya membuktikan jalur DXF dan pagination, **bukan validitas DWG asli**.
 
 Project dibuat di branch terpisah agar website utama Rizog Labs Studio di `main` tidak berubah.
+
+## Deploy GRATIS tanpa kartu: blitz.cloud
+
+Render menolak pembuatan layanan pada akun saat ini dengan HTTP 402 (memerlukan metode pembayaran). Alternatif yang mendukung Docker publik tanpa kartu: **blitz.cloud Free**.
+
+1. GitHub Actions workflow `.github/workflows/rizogcad-publish.yml` membangun dan mengirim Docker image `ghcr.io/rizoglabs/rizogcad:latest` (linux/amd64) ke GitHub Container Registry (GHCR).
+2. Setelah workflow berhasil, di GitHub buka profil **Rizoglabs → Packages → rizogcad → Package settings → Change visibility → Public**. GitHub membuat paket pertama kali sebagai private; hanya jadikan paket Docker ini public, bukan file gambar teknik.
+3. Daftar dan verifikasi email di https://dashboard.blitz.cloud/ menggunakan akun gratis. Pilih **Host something new → An app from Docker Hub**, lalu tempel image lengkap `ghcr.io/rizoglabs/rizogcad:latest`.
+4. Pilih Free, port **10000** jika diminta, dan buat environment variable `RIZOGCAD_ACCESS_KEY` bernilai kode panjang acak (jangan dipush ke GitHub).
+5. Uji alamat HTTPS yang diberikan: `/api/health` menampilkan `dwg_ready: true` sebelum mencoba upload. Masukkan kode akses di halaman dan uji 1 file DXF, kemudian DWG berlayout.
+6. Paket free blitz.cloud membatasi memori total 512 MB dan menidurkan aplikasi saat idle; gambar tower DWG yang sangat rumit mungkin gagal karena RAM. Verifikasi hasil PDF terhadap DWG sumber.
+
+Tidak ada akun/kode akses blitz yang dibuat secara otomatis oleh GitHub Actions. User harus melakukan pendaftaran satu kali dan mengaktifkan publikasi paket Docker agar bisa ditarik oleh hosting.
+
+Referensi layanan: https://blitz.cloud/docs/deploy-docker-image/ ; https://blitz.cloud/faq/
