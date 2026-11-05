@@ -74,7 +74,7 @@
     if(!serverOK){msg('uploadMessage','File berhasil dipilih, tetapi server konversi belum aktif. Buka README untuk menjalankan server.');updateBtn();return}
     busy=true;setBusy(true,'Membaca layout…');msg('uploadMessage','');
     try{const r=await fetch(api+'/api/inspect?filename='+encodeURIComponent(file.name),{method:'POST',headers:authHeaders(),body:file});if(!r.ok)throw Error(await readResponseError(r));const d=await r.json();if(currentFile!==file)return;
-      layouts=(d.layouts||[]).map(l=>({...l,checked:(l.printable??l.entities??0)>0}));renderLayouts();if((d.warnings||[]).length)msg('layoutWarn',d.warnings.join(' • '));markStep(2);$('totalBadge').textContent=layouts.length+' LAYOUT';
+      layouts=(d.layouts||[]).map(l=>({...l,checked:(l.printable??l.entities??0)>0}));renderLayouts();if((d.warnings||[]).length)msg('layoutWarn',d.warnings.join(' • '));if(!layouts.some(l=>l.checked)&&d.model_entities>0)msg('layoutWarn','File ini tidak memiliki paper layout berisi gambar. Model Space mungkin berisi beberapa lembar yang disusun berdampingan; memilih Model Space hanya akan menghasilkan satu halaman gabungan, bukan otomatis memotong tiap lembar.');markStep(2);$('totalBadge').textContent=layouts.length+' LAYOUT';
     }catch(e){if(currentFile===file){msg('uploadMessage',e.message||'Gagal membaca file CAD.');$('layoutList').innerHTML='<div class="empty">Layout belum dapat dibaca.</div>';$('totalBadge').textContent='ERROR'}}finally{busy=false;updateBtn()}
   }
   function renderLayouts(){
