@@ -69,6 +69,19 @@ PDF contoh 3 layout hanya membuktikan jalur DXF dan pagination, **bukan validita
 
 Project dibuat di branch terpisah agar website utama Rizog Labs Studio di `main` tidak berubah.
 
+## Cara paling mudah: deploy GRATIS dari GitHub langsung ke blitz.cloud
+
+Tidak perlu Render, kartu kredit, maupun membuat paket Docker publik.
+
+1. Kunjungi https://dashboard.blitz.cloud/ dan buat akun Free, kemudian verifikasi email.
+2. Pilih **Host something new → My own code**. Hubungkan GitHub akun Rizoglabs bila diminta, lalu pilih repository `Rizoglabs/rizog-labs-studio`.
+3. Buka **Advanced settings** dan isi **Branch**: `rizogcad-converter`, **Folder to build**: `RizogCAD`, **Dockerfile**: `Dockerfile`.
+4. Beri nama aplikasi `rizogcad` dan deploy. Docker image sudah dikonfigurasi memakai port 10000; bila dashboard tidak mendeteksi port, atur 10000.
+5. Di tab **Environment**, tambahkan `RIZOGCAD_ACCESS_KEY` dengan kode akses kuat dan rahasia. Restart/redeploy bila diminta.
+6. Buka alamat HTTPS aplikasi yang diberikan. Pastikan `/api/health` menampilkan `dwg_ready: true`; lalu lakukan tes DXF dan DWG. Periksa halaman/VIEWPORT/manual plotting CAD sebelum memakai PDF untuk engineering.
+
+Keterbatasan Free: memori total 512 MB dan aplikasi tidur saat idle. DWG besar atau kompleks dapat kehabisan RAM. Dokumentasi: https://blitz.cloud/docs/deploy-from-github/ .
+
 ## Deploy GRATIS tanpa kartu: blitz.cloud
 
 Render menolak pembuatan layanan pada akun saat ini dengan HTTP 402 (memerlukan metode pembayaran). Alternatif yang mendukung Docker publik tanpa kartu: **blitz.cloud Free**.
